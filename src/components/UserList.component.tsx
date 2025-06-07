@@ -2,8 +2,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { IUsersResponse } from "../model/user.interface";
 import { apiGet } from "../api/http.api";
 import UserItem from "./UserItem.compnent";
-import LoadingMessage from "./Loading.component";
-import ErrorMessage from "./Error.component";
+import { type Status } from "./QueryStatusIndicator.component";
+import QueryStatusIndicator from "./QueryStatusIndicator.component";
 
 export default function UserList() {
   const limit = 10;
@@ -19,21 +19,19 @@ export default function UserList() {
   }
 
   // Queries
-  const { data, error, isPending, isError } = useQuery(groupOptions());
-
-  if (isPending) {
-    return <LoadingMessage />;
-  }
-
-  if (isError) {
-    return <ErrorMessage message={error.message} />;
-  }
-
+  const { data, error, status, isFetching } = useQuery(groupOptions());
   return (
-    <div className="flex flex-col gap-6 max-w-xl">
-      {data?.map((user) => {
-        return <UserItem key={user.id} user={user} />;
-      })}
-    </div>
+    <>
+      <QueryStatusIndicator
+        error={error}
+        isFetching={isFetching}
+        status={status as Status}
+      />
+      <div className="flex flex-col gap-6 max-w-xl">
+        {data?.map((user) => {
+          return <UserItem key={user.id} user={user} />;
+        })}
+      </div>
+    </>
   );
 }

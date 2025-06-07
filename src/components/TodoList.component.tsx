@@ -8,8 +8,8 @@ import { apiGet, apiPost } from "../api/http.api";
 import type { ITodo, ITodosResponse } from "../model/todo.interface";
 import { generateNumericId } from "../helper/autoGenerateId.helper";
 import TodoItem from "./TodoItem.component";
-import ErrorMessage from "./Error.component";
-import LoadingMessage from "./Loading.component";
+import { type Status } from "./QueryStatusIndicator.component";
+import QueryStatusIndicator from "./QueryStatusIndicator.component";
 
 export default function TodoList() {
   const limit = 10;
@@ -35,12 +35,12 @@ export default function TodoList() {
           `/todos${userIdPath}?limit=${limit}&skip=${skip}`
         ),
       staleTime: 5 * 1000,
-      select: (data) => data.todos
+      select: (data) => data.todos,
     });
   }
 
   // Queries
-  const { data, error, isPending, isError } = useQuery(groupOptions());
+  const { data, error, status, isFetching } = useQuery(groupOptions());
 
   // Mutations
   const mutation = useMutation({
@@ -51,34 +51,29 @@ export default function TodoList() {
     },
   });
 
-  if (isPending) {
-    return (
-      <LoadingMessage />
-    );
-  }
-
-  if (isError) {
-    return (
-      <ErrorMessage message={error.message} />
-    );
-  }
-
   return (
-    <div className="flex flex-col gap-2 max-w-xl">
-      <ul className=" bg-white p-6 rounded-lg shadow">
-        {data?.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} />
-        ))}
-      </ul>
+    <>
+      <QueryStatusIndicator
+        error={error}
+        isFetching={isFetching}
+        status={status as Status}
+      />
+      <div className="flex flex-col gap-2 max-w-xl">
+        <ul className=" bg-white p-6 rounded-lg shadow">
+          {data?.map((todo) => (
+            <TodoItem key={todo.id} todo={todo} />
+          ))}
+        </ul>
 
-      <button
-        onClick={() => {
-          mutation.mutate(newTodo);
-        }}
-        className="px-4 py-2 font-medium text-white bg-teal-500 rounded-md"
-      >
-        Add Todo
-      </button>
-    </div>
+        <button
+          onClick={() => {
+            mutation.mutate(newTodo);
+          }}
+          className="px-4 py-2 font-medium text-white bg-teal-500 rounded-md"
+        >
+          Add Todo
+        </button>
+      </div>
+    </>
   );
 }

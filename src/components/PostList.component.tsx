@@ -3,8 +3,8 @@ import type { IPostResponse } from "../model/post.interface";
 import { apiGet } from "../api/http.api";
 import PostItem from "./PostItem.component";
 import { FileWarning } from "lucide-react";
-import LoadingMessage from "./Loading.component";
-import ErrorMessage from "./Error.component";
+import { type Status } from "./QueryStatusIndicator.component";
+import QueryStatusIndicator from "./QueryStatusIndicator.component";
 
 interface PostListProps {
   userId: number | undefined;
@@ -26,21 +26,18 @@ export default function PostList({ userId }: PostListProps) {
   }
 
   // Queries
-  const { data, error, isPending, isError } = useQuery({
+  const { data, error, status, isFetching } = useQuery({
     ...groupOptions(),
     enabled: !!userId,
   });
 
-  if (isPending) {
-    return <LoadingMessage />;
-  }
-
-  if (isError) {
-    return <ErrorMessage message={error.message} />;
-  }
-
   return (
     <>
+      <QueryStatusIndicator
+        error={error}
+        isFetching={isFetching}
+        status={status as Status}
+      />
       {data?.length ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data?.map((post) => {
@@ -52,7 +49,7 @@ export default function PostList({ userId }: PostListProps) {
           <FileWarning size={15} />
           <p className="text-sm font-medium ">This user has no post</p>
         </div>
-      )}
+      )}{" "}
     </>
   );
 }
