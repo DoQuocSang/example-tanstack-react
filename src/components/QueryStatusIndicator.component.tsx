@@ -30,7 +30,7 @@ export default function QueryStatusIndicator({
   if (isFetching) {
     return (
       <div className="text-slate-700 font-medium text-lg animate-pulse">
-        Refreshing data...
+        Fetching data...
       </div>
     );
   }

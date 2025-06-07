@@ -14,9 +14,9 @@ export default function PostItem({ post }: PostListProps) {
         <div className="flex items-center gap-2">
           <p className="font-medium">Tag:</p>
           <div className="flex items-center gap-2">
-            {post.tags.map((tag) => {
+            {post.tags.map((tag, index) => {
               return (
-                <div className="px-2 py-1 leading-none rounded-lg bg-blue-100 text-blue-700">
+                <div key={index} className="px-2 py-1 leading-none rounded-lg bg-blue-100 text-blue-700">
                   {tag}
                 </div>
               );

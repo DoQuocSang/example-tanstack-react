@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { IPostResponse } from "../model/post.interface";
 import { apiGet } from "../api/http.api";
 import PostItem from "./PostItem.component";
@@ -7,7 +7,7 @@ import { type Status } from "./QueryStatusIndicator.component";
 import QueryStatusIndicator from "./QueryStatusIndicator.component";
 
 interface PostListProps {
-  userId: number | undefined;
+  userId: number;
 }
 
 export default function PostList({ userId }: PostListProps) {
@@ -17,19 +17,18 @@ export default function PostList({ userId }: PostListProps) {
   function groupOptions() {
     return queryOptions({
       queryKey: ["posts", userId],
-      queryFn: () =>
-        apiGet<IPostResponse>(
-          `/posts/user/${userId}?limit=${limit}&skip=${skip}`
-        ),
+      queryFn: userId
+        ? () =>
+            apiGet<IPostResponse>(
+              `/posts/user/${userId}?limit=${limit}&skip=${skip}`
+            )
+        : skipToken,
       select: (data) => data.posts,
     });
   }
 
   // Queries
-  const { data, error, status, isFetching } = useQuery({
-    ...groupOptions(),
-    enabled: !!userId,
-  });
+  const { data, error, status, isFetching } = useQuery(groupOptions());
 
   return (
     <>
