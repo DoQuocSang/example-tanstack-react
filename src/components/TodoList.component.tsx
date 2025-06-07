@@ -34,6 +34,7 @@ export default function TodoList() {
           `/todos${userIdPath}?limit=${limit}&skip=${skip}`
         ),
       staleTime: 5 * 1000,
+      select: (data) => data.todos
     });
   }
 
@@ -69,7 +70,7 @@ export default function TodoList() {
   return (
     <div className="flex flex-col gap-2 max-w-xl">
       <ul className=" bg-white p-6 rounded-lg shadow">
-        {data?.todos?.map((todo) => (
+        {data?.map((todo) => (
           <TodoItem key={todo.id} todo={todo} />
         ))}
       </ul>
