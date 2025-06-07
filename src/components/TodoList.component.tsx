@@ -6,20 +6,25 @@ import TodoItem from "./TodoItem.component";
 import { useEffect } from "react";
 
 export default function TodoList() {
-  const queryClient = useQueryClient();
-
   const limit = 10;
+  const skip = 5;
+  const userId = 2;
+  const isGetByUser = false;
+  const userIdPath = isGetByUser ? `/user/${userId}` : "";
+
   const newTodo: ITodo = {
     id: generateNumericId(),
     todo: "Test item from SDQ",
     completed: false,
-    userId: 26,
+    userId: userId,
   };
+
+  const queryClient = useQueryClient();
 
   // Queries
   const query = useQuery<ITodosResponse>({
     queryKey: ["todos"],
-    queryFn: () => apiGet(`/todos?limit=${limit}`),
+    queryFn: () => apiGet(`/todos${userIdPath}?limit=${limit}&skip=${skip}`),
   });
 
   // Mutations
