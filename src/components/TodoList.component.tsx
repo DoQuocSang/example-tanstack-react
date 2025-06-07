@@ -1,9 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  queryOptions,
+} from "@tanstack/react-query";
 import { apiGet, apiPost } from "../api/http.api";
 import type { ITodo, ITodosResponse } from "../model/todo.interface";
 import { generateNumericId } from "../helper/autoGenerateId.helper";
 import TodoItem from "./TodoItem.component";
-import { useEffect } from "react";
+import { LoaderIcon } from "lucide-react";
 
 export default function TodoList() {
   const limit = 10;
@@ -21,11 +26,19 @@ export default function TodoList() {
 
   const queryClient = useQueryClient();
 
+  function groupOptions() {
+    return queryOptions({
+      queryKey: ["todos"],
+      queryFn: () =>
+        apiGet<ITodosResponse>(
+          `/todos${userIdPath}?limit=${limit}&skip=${skip}`
+        ),
+      staleTime: 5 * 1000,
+    });
+  }
+
   // Queries
-  const query = useQuery<ITodosResponse>({
-    queryKey: ["todos"],
-    queryFn: () => apiGet(`/todos${userIdPath}?limit=${limit}&skip=${skip}`),
-  });
+  const { data, error, isPending, isError } = useQuery(groupOptions());
 
   // Mutations
   const mutation = useMutation({
@@ -36,14 +49,27 @@ export default function TodoList() {
     },
   });
 
-  useEffect(() => {
-    console.log("query:", query);
-  }, [query]);
+  if (isPending) {
+    return (
+      <div className="flex items-center gap-4 text-slate-700 font-medium text-lg animate-pulse">
+        <LoaderIcon size={20} className="animate-spin" />
+        <span>Loading...</span>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <span className="text-lg font-medium text-red-500">
+        Error: {error.message}
+      </span>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-2 max-w-xl">
       <ul className=" bg-white p-6 rounded-lg shadow">
-        {query.data?.todos?.map((todo) => (
+        {data?.todos?.map((todo) => (
           <TodoItem key={todo.id} todo={todo} />
         ))}
       </ul>
