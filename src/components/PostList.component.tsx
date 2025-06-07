@@ -3,6 +3,8 @@ import type { IPostResponse } from "../model/post.interface";
 import { apiGet } from "../api/http.api";
 import PostItem from "./PostItem.component";
 import { FileWarning } from "lucide-react";
+import LoadingMessage from "./Loading.component";
+import ErrorMessage from "./Error.component";
 
 interface PostListProps {
   userId: number | undefined;
@@ -24,10 +26,18 @@ export default function PostList({ userId }: PostListProps) {
   }
 
   // Queries
-  const { data } = useQuery({
+  const { data, error, isPending, isError } = useQuery({
     ...groupOptions(),
     enabled: !!userId,
   });
+
+  if (isPending) {
+    return <LoadingMessage />;
+  }
+
+  if (isError) {
+    return <ErrorMessage message={error.message} />;
+  }
 
   return (
     <>

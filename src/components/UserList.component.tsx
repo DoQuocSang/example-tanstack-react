@@ -2,6 +2,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { IUsersResponse } from "../model/user.interface";
 import { apiGet } from "../api/http.api";
 import UserItem from "./UserItem.compnent";
+import LoadingMessage from "./Loading.component";
+import ErrorMessage from "./Error.component";
 
 export default function UserList() {
   const limit = 10;
@@ -17,7 +19,15 @@ export default function UserList() {
   }
 
   // Queries
-  const { data } = useQuery(groupOptions());
+  const { data, error, isPending, isError } = useQuery(groupOptions());
+
+  if (isPending) {
+    return <LoadingMessage />;
+  }
+
+  if (isError) {
+    return <ErrorMessage message={error.message} />;
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-xl">

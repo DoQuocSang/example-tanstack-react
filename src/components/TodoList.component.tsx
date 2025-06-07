@@ -8,7 +8,8 @@ import { apiGet, apiPost } from "../api/http.api";
 import type { ITodo, ITodosResponse } from "../model/todo.interface";
 import { generateNumericId } from "../helper/autoGenerateId.helper";
 import TodoItem from "./TodoItem.component";
-import { LoaderIcon } from "lucide-react";
+import ErrorMessage from "./Error.component";
+import LoadingMessage from "./Loading.component";
 
 export default function TodoList() {
   const limit = 10;
@@ -52,18 +53,13 @@ export default function TodoList() {
 
   if (isPending) {
     return (
-      <div className="flex items-center gap-4 text-slate-700 font-medium text-lg animate-pulse">
-        <LoaderIcon size={20} className="animate-spin" />
-        <span>Loading...</span>
-      </div>
+      <LoadingMessage />
     );
   }
 
   if (isError) {
     return (
-      <span className="text-lg font-medium text-red-500">
-        Error: {error.message}
-      </span>
+      <ErrorMessage message={error.message} />
     );
   }
 
