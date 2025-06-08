@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { usePaginationStore } from "../stores/pagination.store";
+import { usePaginationStore } from "../../stores/pagination.store";
 
 export default function Pagination() {
   const currentPage = usePaginationStore((state) => state.currentPage);

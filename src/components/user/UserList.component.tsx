@@ -3,13 +3,13 @@ import {
   queryOptions,
   useQuery,
 } from "@tanstack/react-query";
-import type { IUsersResponse } from "../model/user.interface";
-import { apiGet } from "../api/http.api";
+import type { IUsersResponse } from "../../model/user.interface";
+import { apiGet } from "../../api/http.api";
 import UserItem from "./UserItem.compnent";
-import { type Status } from "./QueryStatusIndicator.component";
-import QueryStatusIndicator from "./QueryStatusIndicator.component";
-import Pagination from "./Pagination.component";
-import { usePaginationStore } from "../stores/pagination.store";
+import { type Status } from "../common/QueryStatusIndicator.component";
+import QueryStatusIndicator from "../common/QueryStatusIndicator.component";
+import Pagination from "../common/Pagination.component";
+import { usePaginationStore } from "../../stores/pagination.store";
 import { useEffect } from "react";
 
 export default function UserList() {

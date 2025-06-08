@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import UserList from "./components/UserList.component";
+import UserList from "./components/user/UserList.component";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import TodoList from "./components/TodoList.component";
-import Layout from "./components/Layout.component";
+import TodoList from "./components/todo/TodoList.component";
+import Layout from "./components/layout/Layout.component";
 
 // Create a client
 const queryClient = new QueryClient();

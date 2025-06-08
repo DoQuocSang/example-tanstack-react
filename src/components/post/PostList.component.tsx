@@ -1,10 +1,10 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import type { IPostResponse } from "../model/post.interface";
-import { apiGet } from "../api/http.api";
+import type { IPostResponse } from "../../model/post.interface";
+import { apiGet } from "../../api/http.api";
 import PostItem from "./PostItem.component";
 import { FileWarning } from "lucide-react";
-import { type Status } from "./QueryStatusIndicator.component";
-import QueryStatusIndicator from "./QueryStatusIndicator.component";
+import { type Status } from "../common/QueryStatusIndicator.component";
+import QueryStatusIndicator from "../common/QueryStatusIndicator.component";
 
 interface PostListProps {
   userId: number;

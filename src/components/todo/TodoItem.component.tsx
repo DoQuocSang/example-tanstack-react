@@ -1,5 +1,5 @@
 import { CircleCheck, CircleX } from "lucide-react";
-import type { ITodo } from "../model/todo.interface";
+import type { ITodo } from "../../model/todo.interface";
 
 interface TodoItemProp {
   todo: ITodo;

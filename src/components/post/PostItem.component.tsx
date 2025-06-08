@@ -1,5 +1,5 @@
 import { Eye, ThumbsDown, ThumbsUp } from "lucide-react";
-import type { IPost } from "../model/post.interface";
+import type { IPost } from "../../model/post.interface";
 
 interface PostItemProps {
   post: IPost;

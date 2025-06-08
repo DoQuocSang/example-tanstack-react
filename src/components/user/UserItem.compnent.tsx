@@ -1,5 +1,5 @@
-import type { IUser } from "../model/user.interface";
-import PostList from "./PostList.component";
+import type { IUser } from "../../model/user.interface";
+import PostList from "../post/PostList.component";
 
 interface UserItemsProps {
   user: IUser;

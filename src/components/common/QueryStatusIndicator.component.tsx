@@ -1,6 +1,5 @@
 import { LoaderIcon } from "lucide-react";
-
-export type Status = "pending" | "error";
+import type { Status } from "../../model/status.model";
 
 interface QueryStatusIndicatorProps {
   status: Status;
@@ -22,9 +21,11 @@ export default function QueryStatusIndicator({
     );
   }
   if (status === "error" && error) {
-    <span className="text-lg font-medium text-red-500">
-      Error: {error.message}
-    </span>;
+    return (
+      <span className="text-lg font-medium text-red-500">
+        Error: {error.message}
+      </span>
+    );
   }
 
   if (isFetching) {
