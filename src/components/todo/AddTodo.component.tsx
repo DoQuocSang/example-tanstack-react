@@ -1,20 +1,29 @@
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiPost } from "../../api/http.api";
 import type { ITodo, ITodoCreatedResponse } from "../../model/todo.interface";
 import { generateNumericId } from "../../helper/autoGenerateId.helper";
 import MutationStatusIndicator from "../common/MutationStatusIndicator.component";
-import type { Status } from "../../model/status.model";
 import type { IMessage } from "../../model/message.interface";
+import { useTodoMutationStore } from "../../stores/todo-mutation.store";
+import type { Status } from "../../model/status.model";
 
 export default function AddTodo() {
   const userId = 2;
 
-  const [todo, setTodo] = useState("");
+  const [input, setInput] = useState("");
   // const queryClient = useQueryClient();
 
+  const setTodo = useTodoMutationStore((state) => state.setTodo);
+  const setStatus = useTodoMutationStore((state) => state.setStatus);
+  const setCompleted = useTodoMutationStore((state) => state.setCompleted);
+
   // Mutations
-  const mutation = useMutation<ITodoCreatedResponse, Error, Partial<ITodo>>({
+  const { status, data, error, variables, mutate } = useMutation<
+    ITodoCreatedResponse,
+    Error,
+    ITodo
+  >({
     mutationFn: (data) => apiPost("/todos/add", data),
     onSuccess: () => {
       // Invalidate and refetch
@@ -22,36 +31,45 @@ export default function AddTodo() {
     },
   });
 
+  useEffect(() => {
+    if (variables) {
+      setTodo(variables);
+    }
+    if (status) {
+      setStatus(status as Status);
+    }
+    if (data?.completed !== undefined) {
+      setCompleted(data.completed);
+    }
+  }, [variables, data, status, setTodo, setStatus, setCompleted]);
+
   const onCreateTodo = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newTodo: ITodo = {
       id: generateNumericId(),
-      todo: todo,
+      todo: input,
       completed: false,
       userId: userId,
     };
-    mutation.mutate(newTodo);
+    setInput("");
+    mutate(newTodo);
   };
 
   const messages: IMessage = {
     loading: "Adding todo...",
-    error: mutation.error ? mutation.error.message : "",
+    error: error ? error.message : "",
     success: "Todo added!",
     created: "Todo has been created but has not been added to Server",
   };
 
   return (
     <>
-      <MutationStatusIndicator
-        status={mutation.status as Status}
-        completed={mutation.data?.completed ?? false}
-        messages={messages}
-      />
+      <MutationStatusIndicator messages={messages} />
       <form onSubmit={onCreateTodo} className="flex items-center rounded-lg">
         <input
           type="text"
-          value={todo}
-          onChange={(e) => setTodo(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Create todo item"
           className="w-full focus:outline-none bg-white rounded-l-lg py-2 px-4"
         />

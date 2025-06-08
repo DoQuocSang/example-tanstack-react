@@ -3,11 +3,19 @@ import type { ITodo } from "../../model/todo.interface";
 
 interface TodoItemProp {
   todo: ITodo;
+  isMutationTodo?: boolean;
 }
 
-export default function TodoItem({ todo }: TodoItemProp) {
+export default function TodoItem({
+  todo,
+  isMutationTodo = false,
+}: TodoItemProp) {
   return (
-    <div className="flex items-center gap-4">
+    <div
+      className={
+        "flex items-center gap-4 " + (isMutationTodo ? "animate-pulse" : "")
+      }
+    >
       {todo.completed ? (
         <button>
           <CircleCheck size={20} className="text-emerald-500" />

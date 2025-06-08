@@ -1,18 +1,17 @@
 import { CheckCircle, LoaderIcon, XCircle } from "lucide-react";
-import type { Status } from "../../model/status.model";
 import type { IMessage } from "../../model/message.interface";
+import { useTodoMutationStore } from "../../stores/todo-mutation.store";
 
 interface MutationStatusIndicatorProps {
-  status: Status;
-  completed: boolean;
   messages: IMessage;
 }
 
 export default function MutationStatusIndicator({
-  status,
-  completed,
   messages,
 }: MutationStatusIndicatorProps) {
+  const status = useTodoMutationStore((state) => state.status);
+  const completed = useTodoMutationStore((state) => state.completed);
+
   if (status === "pending") {
     return (
       <div className="flex items-center gap-4 bg-white rounded-md px-4 py-2 w-full text-slate-700 font-medium text-md animate-pulse">

@@ -1,3 +1,10 @@
+export const DEFAULT_TODO: ITodo = {
+  id: 0,
+  todo: "",
+  completed: false,
+  userId: 0,
+};
+
 export interface ITodo {
   id: number;
   todo: string;
