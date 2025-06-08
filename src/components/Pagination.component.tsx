@@ -4,6 +4,9 @@ import { usePaginationStore } from "../stores/pagination.store";
 export default function Pagination() {
   const currentPage = usePaginationStore((state) => state.currentPage);
   const totalPage = usePaginationStore((state) => state.totalPage);
+  const isPlaceholderData = usePaginationStore(
+    (state) => state.isPlaceholderData
+  );
   const setCurrentPage = usePaginationStore((state) => state.setCurrentPage);
 
   const visiblePages = 4;
@@ -33,9 +36,15 @@ export default function Pagination() {
       {pages.map((page) => {
         return (
           <button
-            onClick={() => setCurrentPage(page)}
+            key={page}
+            onClick={() => {
+              if (!isPlaceholderData) {
+                setCurrentPage(page);
+              }
+            }}
+            disabled={isPlaceholderData}
             className={
-              "h-10 w-10 flex justify-center items-center rounded-lg shadow-md hover:bg-teal-500 hover:text-white transition ease-in-out duration-150 " +
+              "h-10 w-10 flex justify-center items-center rounded-lg shadow-md hover:bg-teal-500 hover:text-white disabled:bg-gray-300 disabled:hover:text-slate-700 disabled:hover:bg-white transition ease-in-out duration-150 " +
               (page === currentPage
                 ? "bg-teal-500 text-white"
                 : "bg-white text-slate-700")
@@ -46,8 +55,12 @@ export default function Pagination() {
         );
       })}
       <button
-        disabled={currentPage === totalPage}
-        onClick={() => setCurrentPage(currentPage + 1)}
+        disabled={isPlaceholderData || currentPage === totalPage}
+        onClick={() => {
+          if (!isPlaceholderData) {
+            setCurrentPage(currentPage + 1);
+          }
+        }}
         className="h-10 w-10 flex justify-center items-center rounded-lg shadow-md text-slate-700 bg-white disabled:bg-gray-300 disabled:hover:text-slate-700 hover:bg-teal-500 hover:text-white transition ease-in-out duration-150"
       >
         <ChevronRight size={20} />

@@ -1,4 +1,8 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  queryOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import type { IUsersResponse } from "../model/user.interface";
 import { apiGet } from "../api/http.api";
 import UserItem from "./UserItem.compnent";
@@ -14,6 +18,9 @@ export default function UserList() {
   const skip = (currentPage - 1) * limit;
   const setCurrentPage = usePaginationStore((state) => state.setCurrentPage);
   const setTotalPage = usePaginationStore((state) => state.setTotalPage);
+  const setIsPlaceholderData = usePaginationStore(
+    (state) => state.setIsPlaceholderData
+  );
 
   function groupOptions() {
     return queryOptions({
@@ -22,19 +29,27 @@ export default function UserList() {
         apiGet<IUsersResponse>(`/users?limit=${limit}&skip=${skip}`),
       retry: 5,
       retryDelay: 1000,
+      placeholderData: keepPreviousData,
     });
   }
 
   // Queries
-  const { data, error, status, isFetching, isSuccess } = useQuery(
-    groupOptions()
-  );
+  const { data, error, status, isFetching, isSuccess, isPlaceholderData } =
+    useQuery(groupOptions());
 
   useEffect(() => {
     if (isSuccess) {
       setTotalPage(Math.ceil(data.total / limit));
+      setIsPlaceholderData(isPlaceholderData);
     }
-  }, [data, isSuccess, setCurrentPage, setTotalPage]);
+  }, [
+    data,
+    isSuccess,
+    isPlaceholderData,
+    setCurrentPage,
+    setTotalPage,
+    setIsPlaceholderData,
+  ]);
 
   return (
     <>
