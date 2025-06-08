@@ -48,11 +48,6 @@ export default function AddTodo() {
         messages={messages}
       />
       <form onSubmit={onCreateTodo} className="flex items-center rounded-lg">
-        {mutation.error && (
-          <h5 onClick={() => mutation.reset()}>
-            {(mutation.error as Error).message}
-          </h5>
-        )}
         <input
           type="text"
           value={todo}
