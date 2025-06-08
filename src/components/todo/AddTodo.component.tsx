@@ -1,12 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { apiPost } from "../../api/http.api";
-import type { ITodo, ITodoCreatedResponse } from "../../model/todo.interface";
+import type { ITodo } from "../../model/todo.interface";
 import { generateNumericId } from "../../helper/autoGenerateId.helper";
 import MutationStatusIndicator from "../common/MutationStatusIndicator.component";
 import type { IMessage } from "../../model/message.interface";
-import { useTodoMutationStore } from "../../stores/todo-mutation.store";
-import type { Status } from "../../model/status.model";
 
 export default function AddTodo() {
   const userId = 2;
@@ -14,34 +12,15 @@ export default function AddTodo() {
   const [input, setInput] = useState("");
   // const queryClient = useQueryClient();
 
-  const setTodo = useTodoMutationStore((state) => state.setTodo);
-  const setStatus = useTodoMutationStore((state) => state.setStatus);
-  const setCompleted = useTodoMutationStore((state) => state.setCompleted);
-
   // Mutations
-  const { status, data, error, variables, mutate } = useMutation<
-    ITodoCreatedResponse,
-    Error,
-    ITodo
-  >({
+  const { error, mutate } = useMutation<ITodo, Error, ITodo>({
     mutationFn: (data) => apiPost("/todos/add", data),
     onSuccess: () => {
       // Invalidate and refetch
       // queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
+    mutationKey: ["addTodo"],
   });
-
-  useEffect(() => {
-    if (variables) {
-      setTodo(variables);
-    }
-    if (status) {
-      setStatus(status as Status);
-    }
-    if (data?.completed !== undefined) {
-      setCompleted(data.completed);
-    }
-  }, [variables, data, status, setTodo, setStatus, setCompleted]);
 
   const onCreateTodo = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

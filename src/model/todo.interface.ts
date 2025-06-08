@@ -18,10 +18,3 @@ export interface ITodosResponse {
   skip: number;
   limit: number;
 }
-
-export interface ITodoCreatedResponse {
-  id: number;
-  todo: string;
-  completed: boolean;
-  userId: number;
-}
