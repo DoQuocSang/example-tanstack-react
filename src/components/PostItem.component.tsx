@@ -1,11 +1,11 @@
 import { Eye, ThumbsDown, ThumbsUp } from "lucide-react";
 import type { IPost } from "../model/post.interface";
 
-interface PostListProps {
+interface PostItemProps {
   post: IPost;
 }
 
-export default function PostItem({ post }: PostListProps) {
+export default function PostItem({ post }: PostItemProps) {
   return (
     <div className="flex flex-col gap-2 p-4 bg-white rounded-md shadow text-slate-700">
       <h1 className="font-medium text-sm">{post.title}</h1>
@@ -16,7 +16,10 @@ export default function PostItem({ post }: PostListProps) {
           <div className="flex items-center gap-2">
             {post.tags.map((tag, index) => {
               return (
-                <div key={index} className="px-2 py-1 leading-none rounded-lg bg-blue-100 text-blue-700">
+                <div
+                  key={index}
+                  className="px-2 py-1 leading-none rounded-lg bg-blue-100 text-blue-700"
+                >
                   {tag}
                 </div>
               );

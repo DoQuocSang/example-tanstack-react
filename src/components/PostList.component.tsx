@@ -14,6 +14,13 @@ export default function PostList({ userId }: PostListProps) {
   const limit = 5;
   const skip = 0;
 
+  const initialPosts: IPostResponse = {
+    posts: [],
+    total: 0,
+    skip: 0,
+    limit: 0,
+  };
+
   function groupOptions() {
     return queryOptions({
       queryKey: ["posts", userId],
@@ -28,7 +35,11 @@ export default function PostList({ userId }: PostListProps) {
   }
 
   // Queries
-  const { data, error, status, isFetching } = useQuery(groupOptions());
+  const { data, error, status, isFetching } = useQuery({
+    ...groupOptions(),
+    staleTime: 0,
+    initialData: initialPosts,
+  });
 
   return (
     <>
@@ -48,7 +59,7 @@ export default function PostList({ userId }: PostListProps) {
           <FileWarning size={15} />
           <p className="text-sm font-medium ">This user has no post</p>
         </div>
-      )}{" "}
+      )}
     </>
   );
 }
