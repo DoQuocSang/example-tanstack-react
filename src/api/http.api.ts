@@ -9,10 +9,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return await response.json();
 }
 
-export async function apiGet<T>(url: string): Promise<T> {
+export async function apiGet<T>(url: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(`${BASE_URL}${url}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+    signal,
   });
   return handleResponse<T>(response);
 }
