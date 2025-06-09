@@ -1,15 +1,13 @@
 import {
   useQuery,
   queryOptions,
-  useMutationState,
 } from "@tanstack/react-query";
 import { apiGet } from "../../api/http.api";
-import { type ITodo, type ITodosResponse } from "../../model/todo.interface";
+import { type ITodosResponse } from "../../model/todo.interface";
 import TodoItem from "./TodoItem.component";
 import QueryStatusIndicator from "../common/QueryStatusIndicator.component";
 import AddTodo from "./AddTodo.component";
 import type { Status } from "../../model/status.model";
-import { generateNumericId } from "../../helper/autoGenerateId.helper";
 
 export default function TodoList() {
   const limit = 10;
@@ -33,19 +31,19 @@ export default function TodoList() {
   // Queries
   const { data, error, status, isFetching } = useQuery(groupOptions());
 
-  const states = useMutationState({
-    filters: { mutationKey: ["addTodo"] },
-    select: (mutation) => mutation.state,
-  });
+  // const states = useMutationState({
+  //   filters: { mutationKey: ["addTodo"] },
+  //   select: (mutation) => mutation.state,
+  // });
 
-  const mutationData = useMutationState<ITodo>({
-    filters: { mutationKey: ["addTodo"], status: "pending" },
-    select: (mutation) => mutation.state.variables as ITodo,
-  });
+  // const mutationData = useMutationState<ITodo>({
+  //   filters: { mutationKey: ["addTodo"], status: "pending" },
+  //   select: (mutation) => mutation.state.variables as ITodo,
+  // });
 
-  const isAnyPending = states.some((s) => s.status === "pending");
+  // const isAnyPending = states.some((s) => s.status === "pending");
 
-  const latestPendingTodo = mutationData[mutationData.length - 1];
+  // const latestPendingTodo = mutationData[mutationData.length - 1];
 
   return (
     <>
@@ -61,13 +59,13 @@ export default function TodoList() {
             {data?.map((todo) => (
               <TodoItem key={todo.id} todo={todo} />
             ))}
-            {isAnyPending && (
+            {/* {isAnyPending && (
               <TodoItem
                 key={generateNumericId()}
                 todo={latestPendingTodo}
                 isMutationTodo={true}
               />
-            )}
+            )} */}
           </ul>
         </div>
       )}
