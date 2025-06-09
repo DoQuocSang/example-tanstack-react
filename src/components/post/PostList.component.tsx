@@ -1,56 +1,21 @@
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import type { IPostResponse } from "../../model/post.interface";
-import { apiGet } from "../../api/http.api";
+import type { IPost } from "../../model/post.interface";
 import PostItem from "./PostItem.component";
 import { FileWarning } from "lucide-react";
-import { type Status } from "../common/QueryStatusIndicator.component";
-import QueryStatusIndicator from "../common/QueryStatusIndicator.component";
-
 interface PostListProps {
-  userId: number;
+  posts: IPost[];
 }
 
-export default function PostList({ userId }: PostListProps) {
-  const limit = 5;
-  const skip = 0;
-
-  const initialPosts: IPostResponse = {
-    posts: [],
-    total: 0,
-    skip: 0,
-    limit: 0,
-  };
-
-  function groupOptions() {
-    return queryOptions({
-      queryKey: ["posts", userId],
-      queryFn: userId
-        ? () =>
-            apiGet<IPostResponse>(
-              `/posts/user/${userId}?limit=${limit}&skip=${skip}`
-            )
-        : skipToken,
-      select: (data) => data.posts,
-    });
-  }
-
-  // Queries
-  const { data, error, status, isFetching } = useQuery({
-    ...groupOptions(),
-    staleTime: 0,
-    initialData: initialPosts,
-  });
-
+export default function PostList({ posts }: PostListProps) {
   return (
     <>
-      <QueryStatusIndicator
+      {/* <QueryStatusIndicator
         error={error}
         isFetching={isFetching}
         status={status as Status}
-      />
-      {data?.length ? (
+      /> */}
+      {posts.length ? (
         <div className="grid grid-cols-1 gap-4">
-          {data?.map((post) => {
+          {posts?.map((post) => {
             return <PostItem key={post.id} post={post} />;
           })}
         </div>
