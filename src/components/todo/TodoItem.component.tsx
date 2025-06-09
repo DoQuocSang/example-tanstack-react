@@ -13,7 +13,7 @@ export default function TodoItem({
   return (
     <div
       className={
-        "flex items-center gap-4 " + (isMutationTodo ? "animate-pulse" : "")
+        "flex items-center gap-4 bg-slate-50 my-4 p-4 rounded-md shadow" + (isMutationTodo ? "animate-pulse" : "")
       }
     >
       {todo.completed ? (
