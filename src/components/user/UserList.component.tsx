@@ -1,10 +1,4 @@
-import {
-  keepPreviousData,
-  queryOptions,
-  useQueries,
-  useQuery,
-} from "@tanstack/react-query";
-import type { IUsersResponse } from "../../model/user.interface";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { apiGet } from "../../api/http.api";
 import UserItem from "./UserItem.compnent";
 import QueryStatusIndicator from "../common/QueryStatusIndicator.component";
@@ -13,32 +7,20 @@ import { usePaginationStore } from "../../stores/pagination.store";
 import { useEffect } from "react";
 import type { Status } from "../../model/status.model";
 import { type IPostResponse } from "../../model/post.interface";
+import useCustomQuery from "../../hooks/useCustomQuery.hook";
 
 export default function UserList() {
-  const currentPage = usePaginationStore((state) => state.currentPage);
-  const limit = 10;
-  const skip = (currentPage - 1) * limit;
   const setCurrentPage = usePaginationStore((state) => state.setCurrentPage);
   const setTotalPage = usePaginationStore((state) => state.setTotalPage);
   const setIsPlaceholderData = usePaginationStore(
     (state) => state.setIsPlaceholderData
   );
 
-  function groupOptions() {
-    return queryOptions({
-      queryKey: ["users", currentPage],
-      queryFn: () =>
-        apiGet<IUsersResponse>(`/users?limit=${limit}&skip=${skip}`),
-      retry: 5,
-      retryDelay: 1000,
-      staleTime: 5000,
-      placeholderData: keepPreviousData,
-    });
-  }
+  const { usersGroupOptions, limit } = useCustomQuery();
 
   // Queries
   const { data, error, status, isFetching, isSuccess, isPlaceholderData } =
-    useQuery(groupOptions());
+    useQuery(usersGroupOptions());
 
   const userPostsData = useQueries({
     queries: data
@@ -65,6 +47,7 @@ export default function UserList() {
     setCurrentPage,
     setTotalPage,
     setIsPlaceholderData,
+    limit,
   ]);
 
   return (

@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import useTodoQuery from "../../hooks/useCustomQuery.hook";
 
 export default function Layout() {
   function onClickNavLink(isActive: boolean) {
@@ -12,6 +13,12 @@ export default function Layout() {
       return `${baseClassName} ${inativeClassName}`;
     }
   }
+
+  const { queryClient, todosGroupOptions, usersGroupOptions } = useTodoQuery();
+
+  queryClient.prefetchQuery(todosGroupOptions());
+
+  queryClient.prefetchQuery(usersGroupOptions());
 
   return (
     <div className="flex flex-col gap-6 items-center py-12 px-8 bg-gray-50 min-h-screen">

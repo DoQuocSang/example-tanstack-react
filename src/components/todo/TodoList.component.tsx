@@ -1,11 +1,10 @@
-import { useQuery, queryOptions, useQueryClient } from "@tanstack/react-query";
-import { apiGet } from "../../api/http.api";
-import { type ITodosResponse } from "../../model/todo.interface";
+import { useQuery } from "@tanstack/react-query";
 import TodoItem from "./TodoItem.component";
 import QueryStatusIndicator from "../common/QueryStatusIndicator.component";
 import AddTodo from "./AddTodo.component";
 import type { Status } from "../../model/status.model";
 import { useEffect, useState } from "react";
+import useCustomQuery from "../../hooks/useCustomQuery.hook";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function delay(ms: number) {
@@ -13,33 +12,11 @@ function delay(ms: number) {
 }
 
 export default function TodoList() {
-  const limit = 10;
-  const skip = 5;
-  const userId = 2;
-  const isGetByUser = false;
-  const userIdPath = isGetByUser ? `/user/${userId}` : "";
-
-  const queryClient = useQueryClient();
   const [showCancel, setShowCancel] = useState(false);
 
-  function groupOptions() {
-    return queryOptions({
-      queryKey: ["todos"],
-      queryFn: async ({ signal }) => {
-        // await delay(5000);
-        const todoResponse = await apiGet<ITodosResponse>(
-          `/todos${userIdPath}?limit=${limit}&skip=${skip}`,
-          signal
-        );
-        return todoResponse;
-      },
-      staleTime: 5 * 1000,
-      select: (data) => data.todos,
-    });
-  }
+  const { queryClient, todosGroupOptions } = useCustomQuery();
 
-  // Queries
-  const { data, error, status, isFetching } = useQuery(groupOptions());
+  const { data, error, status, isFetching } = useQuery(todosGroupOptions());
 
   // const states = useMutationState({
   //   filters: { mutationKey: ["addTodo"] },
