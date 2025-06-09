@@ -6,11 +6,11 @@ import {
 import type { IUsersResponse } from "../../model/user.interface";
 import { apiGet } from "../../api/http.api";
 import UserItem from "./UserItem.compnent";
-import { type Status } from "../common/QueryStatusIndicator.component";
 import QueryStatusIndicator from "../common/QueryStatusIndicator.component";
 import Pagination from "../common/Pagination.component";
 import { usePaginationStore } from "../../stores/pagination.store";
 import { useEffect } from "react";
+import type { Status } from "../../model/status.model";
 
 export default function UserList() {
   const currentPage = usePaginationStore((state) => state.currentPage);
@@ -29,6 +29,7 @@ export default function UserList() {
         apiGet<IUsersResponse>(`/users?limit=${limit}&skip=${skip}`),
       retry: 5,
       retryDelay: 1000,
+      staleTime: 5000,
       placeholderData: keepPreviousData,
     });
   }
