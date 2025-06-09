@@ -39,12 +39,13 @@ export default function TodoList() {
   });
 
   const mutationData = useMutationState<ITodo>({
-    filters: { mutationKey: ["addTodo"], status: "success" },
+    filters: { mutationKey: ["addTodo"], status: "pending" },
     select: (mutation) => mutation.state.variables as ITodo,
   });
 
   const isAnyPending = states.some((s) => s.status === "pending");
-  const isAnySuccess = states.some((s) => s.status === "success");
+
+  const latestPendingTodo = mutationData[mutationData.length - 1];
 
   return (
     <>
@@ -60,14 +61,13 @@ export default function TodoList() {
             {data?.map((todo) => (
               <TodoItem key={todo.id} todo={todo} />
             ))}
-            {(isAnyPending || isAnySuccess) &&
-              mutationData.map((todo) => (
-                <TodoItem
-                  key={generateNumericId()}
-                  todo={todo}
-                  isMutationTodo={true}
-                />
-              ))}
+            {isAnyPending && (
+              <TodoItem
+                key={generateNumericId()}
+                todo={latestPendingTodo}
+                isMutationTodo={true}
+              />
+            )}
           </ul>
         </div>
       )}

@@ -5,6 +5,13 @@ export const DEFAULT_TODO: ITodo = {
   userId: 0,
 };
 
+export const DEFAULT_TODOS_RESPONSE: ITodosResponse = {
+  todos: [],
+  total: 0,
+  skip: 0,
+  limit: 10,
+};
+
 export interface ITodo {
   id: number;
   todo: string;
