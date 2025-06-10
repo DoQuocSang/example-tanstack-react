@@ -8,6 +8,7 @@ import type { ITodosResponse } from "../model/todo.interface";
 import type { IQueryParam } from "../model/query-param.interface";
 import type { IUsersResponse } from "../model/user.interface";
 import { usePaginationStore } from "../stores/pagination.store";
+import type { IProductResponse } from "../model/product.interface";
 
 export default function useCustomQuery() {
   const queryClient = useQueryClient();
@@ -21,6 +22,11 @@ export default function useCustomQuery() {
   };
 
   const todoQueryParam: IQueryParam = {
+    limit: limit,
+    skip: 0,
+  };
+
+  const productQueryParam: IQueryParam = {
     limit: limit,
     skip: 0,
   };
@@ -55,10 +61,26 @@ export default function useCustomQuery() {
     });
   }
 
+  function productsGroupOptions() {
+    return queryOptions({
+      queryKey: ["products"],
+      queryFn: async ({ signal }) => {
+        const productResponse = await apiGet<IProductResponse>(
+          `/products?limit=${productQueryParam.limit}&skip=${productQueryParam.skip}`,
+          signal
+        );
+        return productResponse;
+      },
+      staleTime: 5 * 1000,
+      select: (data) => data.products,
+    });
+  }
+
   return {
     limit,
     usersGroupOptions,
     todosGroupOptions,
+    productsGroupOptions,
     queryClient,
   };
 }
