@@ -17,13 +17,8 @@ export default function ProductTable() {
   const columnHelper = createColumnHelper<IProduct>();
 
   const columns = [
-    columnHelper.accessor("title", {
-      header: () => "title",
-      cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
-    }),
     columnHelper.accessor("images", {
-      header: () => "images",
+      header: () => "product",
       cell: (info) => {
         const images = info.getValue();
         if (images.length > 0) {
@@ -41,6 +36,11 @@ export default function ProductTable() {
       },
       footer: (info) => info.column.id,
     }),
+    columnHelper.accessor("title", {
+      header: () => "title",
+      cell: (info) => info.renderValue(),
+      footer: (info) => info.column.id,
+    }),
     columnHelper.accessor("description", {
       header: () => "description",
       cell: (info) => <p className="line-clamp-5">{info.renderValue()}</p>,
@@ -51,7 +51,7 @@ export default function ProductTable() {
       cell: (info) => {
         return info.getValue().map((tag, index) => (
           <div key={index} className="flex flex-wrap gap-2">
-            <span className="px-2 py-1 my-1 rounded-md bg-emerald-100 text-emerald-500 text-xs line-clamp-1">
+            <span className="px-2 py-1 my-1 rounded-md bg-blue-100 text-blue-500 text-xs line-clamp-1">
               {tag}
             </span>
           </div>
@@ -155,14 +155,17 @@ export default function ProductTable() {
   });
   return (
     <div className="flex flex-col w-full items-center justify-center mx-6">
-      <div className="bg-white w-full shadow rounded-lg overflow-hidden">
+      <div className="bg-white w-full shadow-md rounded-lg overflow-hidden">
         <div className="w-full overflow-x-auto">
           <table className="table-auto min-w-max">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="bg-blue-100 text-blue-500">
+                <tr key={headerGroup.id} className="bg-gray-200 text-slate-700">
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="py-2 px-4 capitalize">
+                    <th
+                      key={header.id}
+                      className="py-2 px-4 capitalize text-left"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -175,13 +178,10 @@ export default function ProductTable() {
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row, index) => (
+              {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className={
-                    "border-y-2 border-slate-100 text-slate-700 " +
-                    (index % 2 !== 0 ? "bg-slate-100" : "")
-                  }
+                  className="border-y-2 border-slate-100 text-slate-700 hover:bg-slate-100"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
