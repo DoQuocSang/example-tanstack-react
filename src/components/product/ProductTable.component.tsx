@@ -34,17 +34,17 @@ export default function ProductTable() {
           );
         }
       },
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("title", {
       header: () => "title",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("description", {
       header: () => "description",
       cell: (info) => <p className="line-clamp-5">{info.renderValue()}</p>,
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("tags", {
       header: () => "tags",
@@ -57,67 +57,67 @@ export default function ProductTable() {
           </div>
         ));
       },
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("category", {
       header: () => "category",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("brand", {
       header: () => "brand",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("weight", {
       header: () => "weight (g)",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("price", {
       header: () => "price ($)",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("discountPercentage", {
       header: () => "discount (%)",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("stock", {
       header: () => "stock",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("availabilityStatus", {
       header: () => "status",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("rating", {
       header: () => "rating",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("warrantyInformation", {
       header: () => "warranty",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("shippingInformation", {
       header: () => "shipping",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("returnPolicy", {
       header: () => "return policy",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("minimumOrderQuantity", {
       header: () => "minimum order quantity",
       cell: (info) => info.renderValue(),
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
     columnHelper.accessor("dimensions", {
       header: () => "dimensions",
@@ -143,7 +143,7 @@ export default function ProductTable() {
           </div>
         );
       },
-      footer: (info) => info.column.id,
+      footer: (props) => props.column.id,
     }),
   ];
 
