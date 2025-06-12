@@ -35,7 +35,8 @@ export default function ProductTable() {
 
   const columnHelper = createColumnHelper<IProduct>();
 
-  const columns = [
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const groupColumns = [
     columnHelper.group({
       id: "general info",
       header: () => "general info",
@@ -199,12 +200,143 @@ export default function ProductTable() {
     }),
   ];
 
+  const flatColumns = [
+    columnHelper.accessor("images", {
+      header: () => "product",
+      cell: (info) => {
+        const images = info.getValue();
+        if (images.length > 0) {
+          return (
+            <img src={images[0]} className="w-16 h-auto" alt="product-image" />
+          );
+        } else {
+          return (
+            <div className="h-16 w-16 flex flex-col gap-1 items-center text-gray-500">
+              <Image size={20} />
+              <p className="text-center text-xs">No image</p>
+            </div>
+          );
+        }
+      },
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("title", {
+      header: () => "title",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("description", {
+      header: () => "description",
+      cell: (info) => <p className="line-clamp-5">{info.renderValue()}</p>,
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("category", {
+      header: () => "category",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("brand", {
+      header: () => "brand",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("price", {
+      header: () => "price ($)",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("discountPercentage", {
+      header: () => "discount (%)",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("weight", {
+      header: () => "weight (g)",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("stock", {
+      header: () => "stock",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("availabilityStatus", {
+      header: () => "status",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("shippingInformation", {
+      header: () => "shipping",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("dimensions", {
+      header: () => "dimensions",
+      cell: (info) => {
+        const dimension = info.getValue();
+        return (
+          <div className="flex flex-wrap items-center gap-1 text-xs">
+            <p className="bg-teal-100 text-teal-500 p-1 rounded my-1">
+              {dimension.width}
+            </p>
+            <p className="text-slate-700 my-1">
+              <XIcon size={10} />
+            </p>
+            <p className="bg-amber-100 text-amber-600 p-1 rounded my-1">
+              {dimension.height}
+            </p>
+            <p className="text-slate-700my-1">
+              <XIcon size={10} />
+            </p>
+            <p className="bg-red-100 text-red-500 p-1 rounded my-1">
+              {dimension.depth}
+            </p>
+          </div>
+        );
+      },
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("tags", {
+      header: () => "tags",
+      cell: (info) => {
+        return info.getValue().map((tag: string, index: number) => (
+          <div key={index} className="flex flex-wrap gap-2">
+            <span className="px-2 py-1 my-1 rounded-md bg-blue-100 text-blue-500 text-xs line-clamp-1">
+              {tag}
+            </span>
+          </div>
+        ));
+      },
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("rating", {
+      header: () => "rating",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("warrantyInformation", {
+      header: () => "warranty",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("returnPolicy", {
+      header: () => "return policy",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+    columnHelper.accessor("minimumOrderQuantity", {
+      header: () => "minimum order quantity",
+      cell: (info) => info.renderValue(),
+      footer: (props) => props.column.id,
+    }),
+  ];
+
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
-    columns.map((c) => c.id!)
+    flatColumns.map((c) => c.id!)
   );
 
   const table = useReactTable({
-    columns: columns.flat(),
+    columns: flatColumns,
     data: data ?? [],
     getCoreRowModel: getCoreRowModel(),
     getRowId: () => uuidv4(),
@@ -212,9 +344,6 @@ export default function ProductTable() {
       columnOrder,
     },
     onColumnOrderChange: setColumnOrder,
-    debugTable: true,
-    debugHeaders: true,
-    debugColumns: true,
   });
 
   function getTailwindClassForHeader(
