@@ -335,6 +335,27 @@ export default function ProductTable() {
     }),
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const sortedFlatColumns = [
+    "availabilityStatus",
+    "brand",
+    "category",
+    "description",
+    "dimensions",
+    "discountPercentage",
+    "images",
+    "minimumOrderQuantity",
+    "price",
+    "rating",
+    "returnPolicy",
+    "shippingInformation",
+    "stock",
+    "tags",
+    "title",
+    "warrantyInformation",
+    "weight",
+  ];
+
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     flatColumns.map((c) => c.id!)
   );
