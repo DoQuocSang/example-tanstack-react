@@ -49,7 +49,7 @@ export default function ProductTable() {
               return (
                 <img
                   src={images[0]}
-                  className="w-16 h-auto"
+                  className="w-16 h-auto mx-auto"
                   alt="product-image"
                 />
               );
@@ -207,7 +207,11 @@ export default function ProductTable() {
         const images = info.getValue();
         if (images.length > 0) {
           return (
-            <img src={images[0]} className="w-16 h-auto" alt="product-image" />
+            <img
+              src={images[0]}
+              className="w-16 h-auto mx-auto"
+              alt="product-image"
+            />
           );
         } else {
           return (
