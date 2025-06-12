@@ -3,13 +3,13 @@ import useCustomQuery from "../../hooks/useCustomQuery.hook";
 import type { IProduct } from "../../model/product.interface";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   useReactTable,
+  type ColumnOrderState,
+  type VisibilityState,
 } from "@tanstack/react-table";
 import { v4 as uuidv4 } from "uuid";
-import { Image, XIcon } from "lucide-react";
-import DraggableHeader from "../table/DraggableHeader.component";
+import { Image, Settings, X, XIcon } from "lucide-react";
 import {
   closestCenter,
   DndContext,
@@ -20,14 +20,10 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import {
-  arrayMove,
-  horizontalListSortingStrategy,
-  SortableContext,
-} from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useState } from "react";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
-import DragAlongCell from "../table/DragAlongCell.component";
+import CustomTable from "../table/CustomTable.component";
 
 export default function ProductTable() {
   const { productsGroupOptions } = useCustomQuery();
@@ -35,7 +31,6 @@ export default function ProductTable() {
 
   const columnHelper = createColumnHelper<IProduct>();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const groupColumns = [
     columnHelper.group({
       id: "general info",
@@ -200,6 +195,7 @@ export default function ProductTable() {
     }),
   ];
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const flatColumns = [
     columnHelper.accessor("images", {
       header: () => "product",
@@ -356,44 +352,34 @@ export default function ProductTable() {
     "weight",
   ];
 
-  const [columnOrder, setColumnOrder] = useState<string[]>(() =>
-    flatColumns.map((c) => c.id!)
-  );
+  const [showColumnSettings, setShowColumnSettings] = useState(false);
+
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
+
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+
+  const [isPinBtnVisible, setIsPinBtnVisible] = useState(false);
+
+  const [isOrderBtnVisible, setIsOrderBtnVisible] = useState(false);
+
+  const [columnPinning, setColumnPinning] = useState({});
+
+  const [isSplit, setIsSplit] = useState(false);
 
   const table = useReactTable({
-    columns: flatColumns,
+    columns: groupColumns,
     data: data ?? [],
     getCoreRowModel: getCoreRowModel(),
     getRowId: () => uuidv4(),
     state: {
+      columnVisibility,
       columnOrder,
+      columnPinning,
     },
+    onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
+    onColumnPinningChange: setColumnPinning,
   });
-
-  function getTailwindClassForHeader(
-    headersLength: number,
-    headerDepth: number,
-    headerIndex: number
-  ) {
-    const isFirstHeader = headerIndex === 0;
-    const isLastHeader = headersLength - 1;
-    if (headerDepth === 1) {
-      if (isFirstHeader) {
-        return "border-l-0 border-t-0";
-      }
-      if (isLastHeader) {
-        return "border-r-0 border-t-0";
-      }
-    } else {
-      if (isFirstHeader) {
-        return "border-l-0";
-      }
-      if (isLastHeader) {
-        return "border-r-0";
-      }
-    }
-  }
 
   // reorder columns after drag & drop
   function handleDragEnd(event: DragEndEvent) {
@@ -415,83 +401,131 @@ export default function ProductTable() {
 
   return (
     <div className="flex flex-col w-full items-center justify-center mx-6">
-      <div className="bg-white w-full shadow-md rounded-lg overflow-hidden">
-        <div className="w-full overflow-x-auto">
-          <DndContext
-            collisionDetection={closestCenter}
-            modifiers={[restrictToHorizontalAxis]}
-            onDragEnd={handleDragEnd}
-            sensors={sensors}
+      <div className="fixed bottom-6 right-6 z-50 h-screen flex flex-col justify-end">
+        {showColumnSettings ? (
+          <div className="bg-white/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden max-h-2/3 overflow-y-auto">
+            <div className="flex flex-col gap-2">
+              <div className="sticky top-0 font-bold flex items-center justify-between bg-teal-500 px-4 py-2 text-white">
+                <h3>Settings</h3>
+                <button onClick={() => setShowColumnSettings(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="text-slate-700 p-6 pt-2 flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <p className="font-medium text-teal-500 p-2 border-2 border-dashed border-teal-500">
+                    Table mode
+                  </p>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={isSplit}
+                      onChange={(e) => setIsSplit(e.target.checked)}
+                    />{" "}
+                    Split Mode
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={isPinBtnVisible}
+                      onChange={(e) => setIsPinBtnVisible(e.target.checked)}
+                    />{" "}
+                    Show pin button
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={isOrderBtnVisible}
+                      onChange={(e) => setIsOrderBtnVisible(e.target.checked)}
+                    />{" "}
+                    Show order grab button
+                  </label>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="font-medium text-teal-500 p-2 border-2 border-dashed border-teal-500">
+                    Column Visible
+                  </p>
+                  <label className="flex items-center gap-2">
+                    <input
+                      {...{
+                        type: "checkbox",
+                        checked: table.getIsAllColumnsVisible(),
+                        onChange: table.getToggleAllColumnsVisibilityHandler(),
+                      }}
+                    />
+                    Toggle All
+                  </label>
+
+                  {table.getAllLeafColumns().map((column) => {
+                    return (
+                      <div key={column.id}>
+                        <label className="flex items-center gap-2">
+                          <input
+                            {...{
+                              type: "checkbox",
+                              checked: column.getIsVisible(),
+                              onChange: column.getToggleVisibilityHandler(),
+                            }}
+                          />{" "}
+                          {column.id}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowColumnSettings(true)}
+            className="rounded-md px-4 py-2 font-medium text-white bg-teal-500/75 hover:bg-teal-500"
           >
-            <table className="table-auto min-w-max rounded-lg overflow-hidden">
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id} className="text-slate-700">
-                    <SortableContext
-                      items={columnOrder}
-                      strategy={horizontalListSortingStrategy}
-                    >
-                      {headerGroup.headers.map((header, index) => (
-                        <DraggableHeader
-                          key={header.id}
-                          header={header}
-                          tailwindClass={getTailwindClassForHeader(
-                            headerGroup.headers.length,
-                            header.depth,
-                            index
-                          )}
-                        />
-                      ))}
-                    </SortableContext>
-                  </tr>
-                ))}
-              </thead>
-              <tbody>
-                {table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="text-slate-700 hover:bg-slate-100"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <DragAlongCell key={cell.id} cell={cell} />
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                {table.getFooterGroups().map((footerGroup) => (
-                  <tr
-                    key={footerGroup.id}
-                    className="bg-gray-100 text-gray-700"
-                  >
-                    {footerGroup.headers.map((footer, index) => (
-                      <th
-                        key={footer.id}
-                        colSpan={footer.colSpan}
-                        className={
-                          "py-2 px-4 capitalize rounded bg-gray-200 text-slate-500 border-2 border-white " +
-                          getTailwindClassForHeader(
-                            footerGroup.headers.length,
-                            footer.depth,
-                            index
-                          )
-                        }
-                      >
-                        {footer.isPlaceholder
-                          ? null
-                          : flexRender(
-                              footer.column.columnDef.footer,
-                              footer.getContext()
-                            )}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </tfoot>
-            </table>
-          </DndContext>
-        </div>
+            <div className="flex items-center justify-between gap-2">
+              <Settings size={20} />
+              <p>Open setting</p>
+            </div>
+          </button>
+        )}
       </div>
+
+      <DndContext
+        collisionDetection={closestCenter}
+        modifiers={[restrictToHorizontalAxis]}
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
+      >
+        <div className="flex items-start gap-4 w-full">
+          {isSplit && (
+            <CustomTable
+              table={table}
+              columnOrder={columnOrder}
+              isSplit={isSplit}
+              isPinBtnVisible={isPinBtnVisible}
+              isOrderBtnVisible={isOrderBtnVisible}
+              tableType={"left"}
+            />
+          )}
+          <CustomTable
+            table={table}
+            columnOrder={columnOrder}
+            isSplit={isSplit}
+            isPinBtnVisible={isPinBtnVisible}
+            isOrderBtnVisible={isOrderBtnVisible}
+            tableType={"center"}
+          />
+          {isSplit && (
+            <CustomTable
+              table={table}
+              columnOrder={columnOrder}
+              isSplit={isSplit}
+              isPinBtnVisible={isPinBtnVisible}
+              isOrderBtnVisible={isOrderBtnVisible}
+              tableType={"right"}
+            />
+          )}
+        </div>
+      </DndContext>
     </div>
   );
 }
