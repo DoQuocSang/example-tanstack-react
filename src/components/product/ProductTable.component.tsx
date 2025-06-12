@@ -9,6 +9,25 @@ import {
 } from "@tanstack/react-table";
 import { v4 as uuidv4 } from "uuid";
 import { Image, XIcon } from "lucide-react";
+import DraggableHeader from "../table/DraggableHeader.component";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  horizontalListSortingStrategy,
+  SortableContext,
+} from "@dnd-kit/sortable";
+import { useState } from "react";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import DragAlongCell from "../table/DragAlongCell.component";
 
 export default function ProductTable() {
   const { productsGroupOptions } = useCustomQuery();
@@ -180,11 +199,22 @@ export default function ProductTable() {
     }),
   ];
 
+  const [columnOrder, setColumnOrder] = useState<string[]>(() =>
+    columns.map((c) => c.id!)
+  );
+
   const table = useReactTable({
-    columns,
+    columns: columns.flat(),
     data: data ?? [],
     getCoreRowModel: getCoreRowModel(),
     getRowId: () => uuidv4(),
+    state: {
+      columnOrder,
+    },
+    onColumnOrderChange: setColumnOrder,
+    debugTable: true,
+    debugHeaders: true,
+    debugColumns: true,
   });
 
   function getTailwindClassForHeader(
@@ -210,86 +240,102 @@ export default function ProductTable() {
       }
     }
   }
+
+  // reorder columns after drag & drop
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((columnOrder) => {
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        const newIndex = columnOrder.indexOf(over.id as string);
+        return arrayMove(columnOrder, oldIndex, newIndex); //this is just a splice util
+      });
+    }
+  }
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {}),
+    useSensor(TouchSensor, {}),
+    useSensor(KeyboardSensor, {})
+  );
+
   return (
     <div className="flex flex-col w-full items-center justify-center mx-6">
       <div className="bg-white w-full shadow-md rounded-lg overflow-hidden">
         <div className="w-full overflow-x-auto">
-          <table className="table-auto min-w-max rounded-lg overflow-hidden">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="text-slate-700">
-                  {headerGroup.headers.map((header, index) => (
-                    <th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className={
-                        "py-2 px-4 capitalize rounded bg-blue-100 text-blue-500 border-2 border-white " +
-                        getTailwindClassForHeader(
-                          headerGroup.headers.length,
-                          header.depth,
-                          index
-                        )
-                      }
+          <DndContext
+            collisionDetection={closestCenter}
+            modifiers={[restrictToHorizontalAxis]}
+            onDragEnd={handleDragEnd}
+            sensors={sensors}
+          >
+            <table className="table-auto min-w-max rounded-lg overflow-hidden">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} className="text-slate-700">
+                    <SortableContext
+                      items={columnOrder}
+                      strategy={horizontalListSortingStrategy}
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
+                      {headerGroup.headers.map((header, index) => (
+                        <DraggableHeader
+                          key={header.id}
+                          header={header}
+                          tailwindClass={getTailwindClassForHeader(
+                            headerGroup.headers.length,
+                            header.depth,
+                            index
                           )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-y-2 border-slate-100 text-slate-700 hover:bg-slate-100"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="py-2 px-4 max-w-[200px] text-pretty "
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              {table.getFooterGroups().map((footerGroup) => (
-                <tr key={footerGroup.id} className="bg-gray-100 text-gray-700">
-                  {footerGroup.headers.map((footer, index) => (
-                    <th
-                      key={footer.id}
-                      colSpan={footer.colSpan}
-                      className={
-                        "py-2 px-4 capitalize rounded bg-gray-200 text-slate-700 border-2 border-white " +
-                        getTailwindClassForHeader(
-                          footerGroup.headers.length,
-                          footer.depth,
-                          index
-                        )
-                      }
-                    >
-                      {footer.isPlaceholder
-                        ? null
-                        : flexRender(
-                            footer.column.columnDef.footer,
-                            footer.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </tfoot>
-          </table>
+                        />
+                      ))}
+                    </SortableContext>
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="text-slate-700 hover:bg-slate-100"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <DragAlongCell key={cell.id} cell={cell} />
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                {table.getFooterGroups().map((footerGroup) => (
+                  <tr
+                    key={footerGroup.id}
+                    className="bg-gray-100 text-gray-700"
+                  >
+                    {footerGroup.headers.map((footer, index) => (
+                      <th
+                        key={footer.id}
+                        colSpan={footer.colSpan}
+                        className={
+                          "py-2 px-4 capitalize rounded bg-gray-200 text-slate-500 border-2 border-white " +
+                          getTailwindClassForHeader(
+                            footerGroup.headers.length,
+                            footer.depth,
+                            index
+                          )
+                        }
+                      >
+                        {footer.isPlaceholder
+                          ? null
+                          : flexRender(
+                              footer.column.columnDef.footer,
+                              footer.getContext()
+                            )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </tfoot>
+            </table>
+          </DndContext>
         </div>
       </div>
     </div>
