@@ -1,0 +1,2 @@
+- Refactor code since many codes are in a same place make it difficult to read
+- Fix feature Drag columns with DnD core kit 

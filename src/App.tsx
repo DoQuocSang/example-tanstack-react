@@ -4,6 +4,7 @@ import UserList from "./components/user/UserList.component";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import TodoList from "./components/todo/TodoList.component";
 import Layout from "./components/layout/Layout.component";
+import ProductTable from "./components/product/ProductTable.component";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ function App() {
             <Route index element={<UserList />} />
             <Route path="/users" element={<UserList />} />
             <Route path="/todos" element={<TodoList />} />
+            <Route path="/products" element={<ProductTable />} />
           </Route>
         </Routes>
       </BrowserRouter>
