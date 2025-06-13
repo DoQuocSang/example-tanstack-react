@@ -217,7 +217,7 @@ function TanStackTable({
                     key={footer.id}
                     colSpan={footer.colSpan}
                     className={
-                      "py-2 px-4 capitalize rounded bg-gray-200 text-slate-500 border-2 border-white " +
+                      "py-2 px-4 capitalize select-none rounded bg-gray-200 text-slate-500 border-2 border-white " +
                       getTailwindClassForHeader(
                         footerGroup.headers.length,
                         footer.depth,

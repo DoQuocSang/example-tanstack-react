@@ -5,10 +5,12 @@ import {
   createColumnHelper,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnOrderState,
   type ColumnResizeMode,
   type PaginationState,
+  type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
 import { v4 as uuidv4 } from "uuid";
@@ -61,6 +63,7 @@ export default function ProductTable() {
             }
           },
           footer: (props) => props.column.id,
+          enableSorting: false,
         }),
         columnHelper.accessor("title", {
           header: () => "title",
@@ -158,6 +161,7 @@ export default function ProductTable() {
             );
           },
           footer: (props) => props.column.id,
+          enableSorting: false,
         }),
         columnHelper.accessor("tags", {
           header: () => "tags",
@@ -171,6 +175,7 @@ export default function ProductTable() {
             ));
           },
           footer: (props) => props.column.id,
+          enableSorting: false,
         }),
         columnHelper.accessor("rating", {
           header: () => "rating",
@@ -370,6 +375,7 @@ export default function ProductTable() {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
     columns: groupColumns,
@@ -380,19 +386,23 @@ export default function ProductTable() {
     },
     columnResizeMode: columnResizeMode,
     enableColumnResizing: true,
+    autoResetPageIndex: false,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getRowId: () => uuidv4(),
     state: {
       columnVisibility,
       columnOrder,
       columnPinning,
       pagination,
+      sorting,
     },
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
     onColumnPinningChange: setColumnPinning,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
+    onSortingChange: setSorting,
   });
 
   // reorder columns after drag & drop
