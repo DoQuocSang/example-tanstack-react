@@ -4,9 +4,11 @@ import type { IProduct } from "../../model/product.interface";
 import {
   createColumnHelper,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
   type ColumnOrderState,
   type ColumnResizeMode,
+  type PaginationState,
   type VisibilityState,
 } from "@tanstack/react-table";
 import { v4 as uuidv4 } from "uuid";
@@ -364,6 +366,10 @@ export default function ProductTable() {
   const [enableResizeDebug, setEnableResizeDebug] = useState(false);
   const [columnResizeMode, setColumnResizeMode] =
     useState<ColumnResizeMode>("onChange");
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const table = useReactTable({
     columns: groupColumns,
@@ -380,10 +386,13 @@ export default function ProductTable() {
       columnVisibility,
       columnOrder,
       columnPinning,
+      pagination,
     },
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
     onColumnPinningChange: setColumnPinning,
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
   });
 
   // reorder columns after drag & drop

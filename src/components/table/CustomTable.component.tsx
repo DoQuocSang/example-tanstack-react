@@ -13,6 +13,7 @@ import DraggableHeader from "./DraggableHeader.component";
 import DragAlongCell from "./DragAlongCell.component";
 import type { ResizeMode, TableType } from "../../model/table.model";
 import { memo } from "react";
+import TablePagination from "./TablePagination.component";
 
 interface TableProps {
   table: Table<IProduct>;
@@ -240,6 +241,7 @@ function TanStackTable({
           </tfoot>
         </table>
       </div>
+      <TablePagination table={table} />
     </div>
   );
 }
