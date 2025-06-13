@@ -11,7 +11,7 @@ import {
 } from "@dnd-kit/sortable";
 import DraggableHeader from "./DraggableHeader.component";
 import DragAlongCell from "./DragAlongCell.component";
-import type { TableType } from "../../model/table.model";
+import type { ResizeMode, TableType } from "../../model/table.model";
 import { memo } from "react";
 
 interface TableProps {
@@ -24,6 +24,7 @@ interface TableProps {
   columnSizeVars: { [key: string]: number };
   totalTableWidth: number;
   enableMemo?: boolean;
+  columnResizeMode: ResizeMode;
 }
 
 function getTailwindClassForHeader(
@@ -159,6 +160,7 @@ function TanStackTable({
   isOrderBtnVisible,
   tableType = "center",
   columnSizeVars,
+  columnResizeMode,
 }: TableProps) {
   return (
     <div className="bg-white w-full shadow-md rounded-lg overflow-hidden">
@@ -189,6 +191,8 @@ function TanStackTable({
                         header.depth,
                         index
                       )}
+                      table={table}
+                      columnResizeMode={columnResizeMode}
                     />
                   ))}
                 </SortableContext>
@@ -250,6 +254,7 @@ export default function CustomTable({
   columnSizeVars,
   totalTableWidth,
   enableMemo,
+  columnResizeMode,
 }: TableProps) {
   return (
     <>
@@ -264,6 +269,7 @@ export default function CustomTable({
             tableType={tableType}
             columnSizeVars={columnSizeVars}
             totalTableWidth={totalTableWidth}
+            columnResizeMode={columnResizeMode}
           />
         ) : (
           <TanStackTable
@@ -275,6 +281,7 @@ export default function CustomTable({
             tableType={tableType}
             columnSizeVars={columnSizeVars}
             totalTableWidth={totalTableWidth}
+            columnResizeMode={columnResizeMode}
           />
         )
       ) : null}

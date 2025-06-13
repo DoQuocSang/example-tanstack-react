@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
   type ColumnOrderState,
+  type ColumnResizeMode,
   type VisibilityState,
 } from "@tanstack/react-table";
 import { v4 as uuidv4 } from "uuid";
@@ -361,6 +362,8 @@ export default function ProductTable() {
   const [isSplit, setIsSplit] = useState(false);
   const [enableMemo, setEnableMemo] = useState(false);
   const [enableResizeDebug, setEnableResizeDebug] = useState(false);
+  const [columnResizeMode, setColumnResizeMode] =
+    useState<ColumnResizeMode>("onChange");
 
   const table = useReactTable({
     columns: groupColumns,
@@ -369,7 +372,7 @@ export default function ProductTable() {
       minSize: 50,
       maxSize: 800,
     },
-    columnResizeMode: "onChange",
+    columnResizeMode: columnResizeMode,
     enableColumnResizing: true,
     getCoreRowModel: getCoreRowModel(),
     getRowId: () => uuidv4(),
@@ -438,6 +441,16 @@ export default function ProductTable() {
                     />{" "}
                     Resize
                   </label>
+                  <select
+                    value={columnResizeMode}
+                    onChange={(e) =>
+                      setColumnResizeMode(e.target.value as ColumnResizeMode)
+                    }
+                    className="border p-2 border-black rounded"
+                  >
+                    <option value="onEnd">onEnd</option>
+                    <option value="onChange">onChange</option>
+                  </select>
                 </div>
                 <div className="flex flex-col gap-2">
                   <p className="font-medium text-teal-500 p-2 border-2 border-dashed border-teal-500">
@@ -562,6 +575,7 @@ export default function ProductTable() {
               columnSizeVars={columnSizeVars}
               totalTableWidth={table.getTotalSize()}
               enableMemo={enableMemo}
+              columnResizeMode={columnResizeMode}
             />
           )}
           <CustomTable
@@ -574,6 +588,7 @@ export default function ProductTable() {
             columnSizeVars={columnSizeVars}
             totalTableWidth={table.getTotalSize()}
             enableMemo={enableMemo}
+            columnResizeMode={columnResizeMode}
           />
           {isSplit && (
             <CustomTable
@@ -586,6 +601,7 @@ export default function ProductTable() {
               columnSizeVars={columnSizeVars}
               totalTableWidth={table.getTotalSize()}
               enableMemo={enableMemo}
+              columnResizeMode={columnResizeMode}
             />
           )}
         </div>

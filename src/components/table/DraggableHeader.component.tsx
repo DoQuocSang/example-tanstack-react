@@ -1,4 +1,4 @@
-import { flexRender, type Header } from "@tanstack/react-table";
+import { flexRender, type Header, type Table } from "@tanstack/react-table";
 import type { IProduct } from "../../model/product.interface";
 import type { CSSProperties } from "react";
 import { useSortable } from "@dnd-kit/sortable";
@@ -9,12 +9,15 @@ import {
   GripVertical,
   XCircle,
 } from "lucide-react";
+import type { ResizeMode } from "../../model/table.model";
 
 interface DraggableHeaderPops {
   header: Header<IProduct, unknown>;
   tailwindClass: string | undefined;
   isPinBtnVisible: boolean;
   isOrderBtnVisible: boolean;
+  table: Table<IProduct>;
+  columnResizeMode: ResizeMode;
 }
 
 export default function DraggableHeader({
@@ -22,6 +25,8 @@ export default function DraggableHeader({
   tailwindClass,
   isPinBtnVisible,
   isOrderBtnVisible,
+  table,
+  columnResizeMode,
 }: DraggableHeaderPops) {
   const { attributes, isDragging, listeners, setNodeRef, transform } =
     useSortable({
@@ -70,6 +75,14 @@ export default function DraggableHeader({
               className: `resizer ${
                 header.column.getIsResizing() ? "isResizing" : ""
               }`,
+              style: {
+                transform:
+                  columnResizeMode === "onEnd" && header.column.getIsResizing()
+                    ? `translateX(${
+                        table.getState().columnSizingInfo.deltaOffset ?? 0
+                      }px)`
+                    : "",
+              },
             }}
           />
           {!header.isPlaceholder &&
