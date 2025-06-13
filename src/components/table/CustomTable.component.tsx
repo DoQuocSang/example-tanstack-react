@@ -122,6 +122,30 @@ function checkTableData(tableType: TableType, table: Table<IProduct>) {
   return false;
 }
 
+function calculateTableWidthByType(
+  table: Table<IProduct>,
+  tableType: TableType
+) {
+  switch (tableType) {
+    case "left":
+      return table
+        .getLeftLeafColumns()
+        .reduce((sum, col) => sum + col.getSize(), 0);
+    case "right":
+      return table
+        .getRightLeafColumns()
+        .reduce((sum, col) => sum + col.getSize(), 0);
+    case "center":
+      return table
+        .getCenterLeafColumns()
+        .reduce((sum, col) => sum + col.getSize(), 0);
+    default:
+      return table
+        .getAllLeafColumns()
+        .reduce((sum, col) => sum + col.getSize(), 0);
+  }
+}
+
 const MemoizedTanStackTable = memo(
   TanStackTable,
   (prev, next) => prev.table.options.data === next.table.options.data
@@ -135,7 +159,6 @@ function TanStackTable({
   isOrderBtnVisible,
   tableType = "center",
   columnSizeVars,
-  totalTableWidth,
 }: TableProps) {
   return (
     <div className="bg-white w-full shadow-md rounded-lg overflow-hidden">
@@ -143,7 +166,8 @@ function TanStackTable({
         <table
           style={{
             ...columnSizeVars,
-            width: totalTableWidth,
+            width: calculateTableWidthByType(table, tableType),
+            minWidth: "100%",
           }}
           className="table-auto w-full rounded-lg overflow-hidden"
         >
