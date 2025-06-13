@@ -41,7 +41,10 @@ export default function DraggableHeader({
     <th
       colSpan={header.colSpan}
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        width: `calc(var(--header-${header?.id}-size) * 1px)`,
+      }}
       className={
         "py-2 px-4 capitalize rounded bg-blue-100 text-blue-500 border-2 border-white " +
         tailwindClass
@@ -59,6 +62,16 @@ export default function DraggableHeader({
               </div>
             )}
           </div>
+          <div
+            {...{
+              onDoubleClick: () => header.column.resetSize(),
+              onMouseDown: header.getResizeHandler(),
+              onTouchStart: header.getResizeHandler(),
+              className: `resizer ${
+                header.column.getIsResizing() ? "isResizing" : ""
+              }`,
+            }}
+          />
           {!header.isPlaceholder &&
             header.column.getCanPin() &&
             isPinBtnVisible && (

@@ -27,7 +27,7 @@ export default function useCustomQuery() {
   };
 
   const productQueryParam: IQueryParam = {
-    limit: limit,
+    limit: limit * 3,
     skip: 0,
   };
 

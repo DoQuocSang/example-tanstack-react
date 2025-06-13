@@ -21,7 +21,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import CustomTable from "../table/CustomTable.component";
 
@@ -33,7 +33,7 @@ export default function ProductTable() {
 
   const groupColumns = [
     columnHelper.group({
-      id: "general info",
+      id: "generalInfo",
       header: () => "general info",
       columns: [
         columnHelper.accessor("images", {
@@ -100,7 +100,7 @@ export default function ProductTable() {
       footer: (props) => props.column.id,
     }),
     columnHelper.group({
-      id: " Inventory & Shipping",
+      id: "inventoryAndShipping",
       header: () => " Inventory & Shipping",
       columns: [
         columnHelper.accessor("weight", {
@@ -127,7 +127,7 @@ export default function ProductTable() {
       footer: (props) => props.column.id,
     }),
     columnHelper.group({
-      id: "additional details",
+      id: "additionalDetails",
       header: () => "additional details",
       columns: [
         columnHelper.accessor("dimensions", {
@@ -353,22 +353,24 @@ export default function ProductTable() {
   ];
 
   const [showColumnSettings, setShowColumnSettings] = useState(false);
-
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>([]);
-
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-
   const [isPinBtnVisible, setIsPinBtnVisible] = useState(false);
-
   const [isOrderBtnVisible, setIsOrderBtnVisible] = useState(false);
-
   const [columnPinning, setColumnPinning] = useState({});
-
   const [isSplit, setIsSplit] = useState(false);
+  const [enableMemo, setEnableMemo] = useState(false);
+  const [enableResizeDebug, setEnableResizeDebug] = useState(false);
 
   const table = useReactTable({
     columns: groupColumns,
     data: data ?? [],
+    defaultColumn: {
+      minSize: 50,
+      maxSize: 800,
+    },
+    columnResizeMode: "onChange",
+    enableColumnResizing: true,
     getCoreRowModel: getCoreRowModel(),
     getRowId: () => uuidv4(),
     state: {
@@ -399,11 +401,23 @@ export default function ProductTable() {
     useSensor(KeyboardSensor, {})
   );
 
+  const columnSizeVars = useMemo(() => {
+    const headers = table.getFlatHeaders();
+    const colSizes: { [key: string]: number } = {};
+    for (let i = 0; i < headers.length; i++) {
+      const header = headers[i]!;
+      colSizes[`--header-${header.id}-size`] = header.getSize();
+      colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
+    }
+    return colSizes;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table.getState().columnSizingInfo, table.getState().columnSizing, table]);
+
   return (
     <div className="flex flex-col w-full items-center justify-center mx-6">
-      <div className="fixed bottom-6 right-6 z-50 h-screen flex flex-col justify-end">
+      <div className="fixed bottom-6 right-6 z-50">
         {showColumnSettings ? (
-          <div className="bg-white/50 backdrop-blur-sm rounded-md shadow-lg overflow-hidden max-h-2/3 overflow-y-auto">
+          <div className="bg-white/50 backdrop-blur-sm max-h-[66vh] overflow-y-auto rounded-md shadow-lg">
             <div className="flex flex-col gap-2">
               <div className="sticky top-0 font-bold flex items-center justify-between bg-teal-500 px-4 py-2 text-white">
                 <h3>Settings</h3>
@@ -412,6 +426,19 @@ export default function ProductTable() {
                 </button>
               </div>
               <div className="text-slate-700 p-6 pt-2 flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <p className="font-medium text-teal-500 p-2 border-2 border-dashed border-teal-500">
+                    Debug
+                  </p>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={enableResizeDebug}
+                      onChange={(e) => setEnableResizeDebug(e.target.checked)}
+                    />{" "}
+                    Resize
+                  </label>
+                </div>
                 <div className="flex flex-col gap-2">
                   <p className="font-medium text-teal-500 p-2 border-2 border-dashed border-teal-500">
                     Table mode
@@ -439,6 +466,14 @@ export default function ProductTable() {
                       onChange={(e) => setIsOrderBtnVisible(e.target.checked)}
                     />{" "}
                     Show order grab button
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={enableMemo}
+                      onChange={(e) => setEnableMemo(e.target.checked)}
+                    />{" "}
+                    Memoize Table body
                   </label>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -488,7 +523,27 @@ export default function ProductTable() {
           </button>
         )}
       </div>
-
+      {enableResizeDebug && (
+        <div className="fixed bottom-6 left-6 z-50 max-h-2/3 overflow-y-auto">
+          <div className="flex flex-col gap-2 bg-slate-900 rounded-md shadow-md overflow-hidden">
+            <div className="sticky top-0 font-bold flex items-center justify-between bg-teal-500 px-4 py-2 text-white">
+              <h3>Debug JSON</h3>
+              <button onClick={() => setEnableResizeDebug(false)}>
+                <X size={20} />
+              </button>
+            </div>
+            <pre className="text-sm  p-6 py-2 text-white">
+              {JSON.stringify(
+                {
+                  columnSizing: table.getState().columnSizing,
+                },
+                null,
+                2
+              )}
+            </pre>
+          </div>
+        </div>
+      )}
       <DndContext
         collisionDetection={closestCenter}
         modifiers={[restrictToHorizontalAxis]}
@@ -504,6 +559,9 @@ export default function ProductTable() {
               isPinBtnVisible={isPinBtnVisible}
               isOrderBtnVisible={isOrderBtnVisible}
               tableType={"left"}
+              columnSizeVars={columnSizeVars}
+              totalTableWidth={table.getTotalSize()}
+              enableMemo={enableMemo}
             />
           )}
           <CustomTable
@@ -513,6 +571,9 @@ export default function ProductTable() {
             isPinBtnVisible={isPinBtnVisible}
             isOrderBtnVisible={isOrderBtnVisible}
             tableType={"center"}
+            columnSizeVars={columnSizeVars}
+            totalTableWidth={table.getTotalSize()}
+            enableMemo={enableMemo}
           />
           {isSplit && (
             <CustomTable
@@ -522,6 +583,9 @@ export default function ProductTable() {
               isPinBtnVisible={isPinBtnVisible}
               isOrderBtnVisible={isOrderBtnVisible}
               tableType={"right"}
+              columnSizeVars={columnSizeVars}
+              totalTableWidth={table.getTotalSize()}
+              enableMemo={enableMemo}
             />
           )}
         </div>
