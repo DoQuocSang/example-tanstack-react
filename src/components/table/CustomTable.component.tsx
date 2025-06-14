@@ -21,6 +21,7 @@ interface TableProps {
   isSplit: boolean;
   isPinBtnVisible: boolean;
   isOrderBtnVisible: boolean;
+  isFilterInputVisible: boolean;
   tableType: TableType;
   columnSizeVars: { [key: string]: number };
   totalTableWidth: number;
@@ -162,6 +163,7 @@ function TanStackTable({
   tableType = "center",
   columnSizeVars,
   columnResizeMode,
+  isFilterInputVisible,
 }: TableProps) {
   return (
     <div className="bg-white w-full shadow-md rounded-lg overflow-hidden">
@@ -194,6 +196,7 @@ function TanStackTable({
                       )}
                       table={table}
                       columnResizeMode={columnResizeMode}
+                      isFilterInputVisible={isFilterInputVisible}
                     />
                   ))}
                 </SortableContext>
@@ -257,6 +260,7 @@ export default function CustomTable({
   totalTableWidth,
   enableMemo,
   columnResizeMode,
+  isFilterInputVisible,
 }: TableProps) {
   return (
     <>
@@ -272,6 +276,7 @@ export default function CustomTable({
             columnSizeVars={columnSizeVars}
             totalTableWidth={totalTableWidth}
             columnResizeMode={columnResizeMode}
+            isFilterInputVisible={isFilterInputVisible}
           />
         ) : (
           <TanStackTable
@@ -284,6 +289,7 @@ export default function CustomTable({
             columnSizeVars={columnSizeVars}
             totalTableWidth={totalTableWidth}
             columnResizeMode={columnResizeMode}
+            isFilterInputVisible={isFilterInputVisible}
           />
         )
       ) : null}

@@ -12,12 +12,14 @@ import {
   XCircle,
 } from "lucide-react";
 import type { ResizeMode } from "../../model/table.model";
+import Filter from "./Filter.component";
 
 interface DraggableHeaderPops {
   header: Header<IProduct, unknown>;
   tailwindClass: string | undefined;
   isPinBtnVisible: boolean;
   isOrderBtnVisible: boolean;
+  isFilterInputVisible: boolean;
   table: Table<IProduct>;
   columnResizeMode: ResizeMode;
 }
@@ -27,6 +29,7 @@ export default function DraggableHeader({
   tailwindClass,
   isPinBtnVisible,
   isOrderBtnVisible,
+  isFilterInputVisible,
   table,
   columnResizeMode,
 }: DraggableHeaderPops) {
@@ -59,7 +62,7 @@ export default function DraggableHeader({
     >
       <div className="flex items-center justify-center">
         <div className="flex flex-col justify-center items-center gap-2">
-          <div className="flex items-center gap-1">
+          <div className="flex flex-col items-center gap-1">
             <div
               className={
                 "flex items-center gap-1 " +
@@ -87,6 +90,12 @@ export default function DraggableHeader({
                 desc: <ArrowDownWideNarrow size={20} />,
               }[header.column.getIsSorted() as string] ?? null}
             </div>
+
+            {header.column.getCanFilter() && isFilterInputVisible ? (
+              <div>
+                <Filter column={header.column} />
+              </div>
+            ) : null}
 
             {isOrderBtnVisible && (
               <div className="cursor-grab" {...attributes} {...listeners}>
