@@ -29,7 +29,7 @@ export default function DragAlongCell({ cell }: DragAlongCellProps) {
         width: `calc(var(--col-${cell.column.id}-size) * 1px)`,
       }}
       ref={setNodeRef}
-      className="py-2 px-4 text-pretty border-2 border-slate-100"
+      className="py-2 px-4 text-pretty border-2 border-slate-100 select-none"
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}
     </td>

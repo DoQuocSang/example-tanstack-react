@@ -4,12 +4,26 @@ import type { IProduct } from "../../model/product.interface";
 import {
   createColumnHelper,
   getCoreRowModel,
+  getFacetedMinMaxValues,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  sortingFns,
   useReactTable,
+  type ColumnFiltersState,
   type ColumnOrderState,
+  type ColumnResizeMode,
+  type FilterFn,
+  type PaginationState,
+  type RowData,
+  type SortingFn,
+  type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
 import { v4 as uuidv4 } from "uuid";
-import { Image, Settings, X, XIcon } from "lucide-react";
+import { Image, Search, Settings, X, XIcon } from "lucide-react";
 import {
   closestCenter,
   DndContext,
@@ -21,9 +35,53 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import CustomTable from "../table/CustomTable.component";
+import {
+  type RankingInfo,
+  rankItem,
+  compareItems,
+} from "@tanstack/match-sorter-utils";
+import DebouncedInput from "../table/DebounceInput.component";
+
+declare module "@tanstack/react-table" {
+  //add fuzzy filter to the filterFns
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    filterVariant?: "text" | "range" | "select";
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  const itemRank = rankItem(row.getValue(columnId), value);
+
+  addMeta({
+    itemRank,
+  });
+
+  return itemRank.passed;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
+  let dir = 0;
+
+  if (rowA.columnFiltersMeta[columnId]) {
+    dir = compareItems(
+      rowA.columnFiltersMeta[columnId]?.itemRank,
+      rowB.columnFiltersMeta[columnId]?.itemRank
+    );
+  }
+  return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
+};
 
 export default function ProductTable() {
   const { productsGroupOptions } = useCustomQuery();
@@ -58,26 +116,33 @@ export default function ProductTable() {
             }
           },
           footer: (props) => props.column.id,
+          enableSorting: false,
+          enableColumnFilter: false,
         }),
         columnHelper.accessor("title", {
           header: () => "title",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "includesString",
         }),
         columnHelper.accessor("description", {
           header: () => "description",
           cell: (info) => <p className="line-clamp-5">{info.renderValue()}</p>,
           footer: (props) => props.column.id,
+          filterFn: "fuzzy",
+          sortingFn: fuzzySort,
         }),
         columnHelper.accessor("category", {
           header: () => "category",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "includesString",
         }),
         columnHelper.accessor("brand", {
           header: () => "brand",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "includesString",
         }),
       ],
       footer: (props) => props.column.id,
@@ -90,11 +155,19 @@ export default function ProductTable() {
           header: () => "price ($)",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "inNumberRange",
+          meta: {
+            filterVariant: "range",
+          },
         }),
         columnHelper.accessor("discountPercentage", {
           header: () => "discount (%)",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "inNumberRange",
+          meta: {
+            filterVariant: "range",
+          },
         }),
       ],
       footer: (props) => props.column.id,
@@ -107,21 +180,34 @@ export default function ProductTable() {
           header: () => "weight (g)",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "inNumberRange",
+          meta: {
+            filterVariant: "range",
+          },
         }),
         columnHelper.accessor("stock", {
           header: () => "stock",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "inNumberRange",
+          meta: {
+            filterVariant: "range",
+          },
         }),
         columnHelper.accessor("availabilityStatus", {
           header: () => "status",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "includesString",
+          meta: {
+            filterVariant: "select",
+          },
         }),
         columnHelper.accessor("shippingInformation", {
           header: () => "shipping",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "includesString",
         }),
       ],
       footer: (props) => props.column.id,
@@ -155,6 +241,8 @@ export default function ProductTable() {
             );
           },
           footer: (props) => props.column.id,
+          enableSorting: false,
+          enableColumnFilter: false,
         }),
         columnHelper.accessor("tags", {
           header: () => "tags",
@@ -168,27 +256,39 @@ export default function ProductTable() {
             ));
           },
           footer: (props) => props.column.id,
+          enableSorting: false,
+          enableColumnFilter: false,
         }),
         columnHelper.accessor("rating", {
           header: () => "rating",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "inNumberRange",
+          meta: {
+            filterVariant: "range",
+          },
         }),
         columnHelper.accessor("warrantyInformation", {
           header: () => "warranty",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "includesString",
         }),
 
         columnHelper.accessor("returnPolicy", {
           header: () => "return policy",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "includesString",
         }),
         columnHelper.accessor("minimumOrderQuantity", {
           header: () => "minimum order quantity",
           cell: (info) => info.renderValue(),
           footer: (props) => props.column.id,
+          filterFn: "inNumberRange",
+          meta: {
+            filterVariant: "range",
+          },
         }),
       ],
       footer: (props) => props.column.id,
@@ -357,10 +457,20 @@ export default function ProductTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [isPinBtnVisible, setIsPinBtnVisible] = useState(false);
   const [isOrderBtnVisible, setIsOrderBtnVisible] = useState(false);
+  const [isFilterInputVisible, setIsFilterInputVisible] = useState(false);
   const [columnPinning, setColumnPinning] = useState({});
   const [isSplit, setIsSplit] = useState(false);
   const [enableMemo, setEnableMemo] = useState(false);
   const [enableResizeDebug, setEnableResizeDebug] = useState(false);
+  const [columnResizeMode, setColumnResizeMode] =
+    useState<ColumnResizeMode>("onChange");
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
     columns: groupColumns,
@@ -369,18 +479,37 @@ export default function ProductTable() {
       minSize: 50,
       maxSize: 800,
     },
-    columnResizeMode: "onChange",
+    columnResizeMode: columnResizeMode,
     enableColumnResizing: true,
+    autoResetPageIndex: false,
+    globalFilterFn: "fuzzy",
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
     getRowId: () => uuidv4(),
     state: {
       columnVisibility,
       columnOrder,
       columnPinning,
+      pagination,
+      sorting,
+      columnFilters,
+      globalFilter,
     },
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
     onColumnPinningChange: setColumnPinning,
+    onPaginationChange: setPagination,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
   });
 
   // reorder columns after drag & drop
@@ -413,8 +542,17 @@ export default function ProductTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [table.getState().columnSizingInfo, table.getState().columnSizing, table]);
 
+  useEffect(() => {
+    if (table.getState().columnFilters.some((f) => f.id === "description")) {
+      if (table.getState().sorting.some((s) => s.id === "description")) {
+        table.setSorting([{ id: "description", desc: false }]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table.getState().columnFilters]);
+
   return (
-    <div className="flex flex-col w-full items-center justify-center mx-6">
+    <div className="flex flex-col gap-4 w-full items-center justify-center mx-6">
       <div className="fixed bottom-6 right-6 z-50">
         {showColumnSettings ? (
           <div className="bg-white/50 backdrop-blur-sm max-h-[66vh] overflow-y-auto rounded-md shadow-lg">
@@ -438,6 +576,16 @@ export default function ProductTable() {
                     />{" "}
                     Resize
                   </label>
+                  <select
+                    value={columnResizeMode}
+                    onChange={(e) =>
+                      setColumnResizeMode(e.target.value as ColumnResizeMode)
+                    }
+                    className="border p-2 border-black rounded"
+                  >
+                    <option value="onEnd">onEnd</option>
+                    <option value="onChange">onChange</option>
+                  </select>
                 </div>
                 <div className="flex flex-col gap-2">
                   <p className="font-medium text-teal-500 p-2 border-2 border-dashed border-teal-500">
@@ -466,6 +614,16 @@ export default function ProductTable() {
                       onChange={(e) => setIsOrderBtnVisible(e.target.checked)}
                     />{" "}
                     Show order grab button
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={isFilterInputVisible}
+                      onChange={(e) =>
+                        setIsFilterInputVisible(e.target.checked)
+                      }
+                    />{" "}
+                    Show fliter input
                   </label>
                   <label>
                     <input
@@ -544,6 +702,31 @@ export default function ProductTable() {
           </div>
         </div>
       )}
+
+      <div className="flex w-full flex-wrap gap-4 items-center justify-between">
+        <div className="flex flex-col gap-2 text-slate-700">
+          <h1 className="font-medium text-2xl">Product Table</h1>
+          <p className="text-sm text-slate-500">
+            This data is fetching from DummyJSON
+          </p>
+        </div>
+
+        <div className="flex items-center overflow-hidden bg-white border border-slate-100 rounded-lg shadow-md">
+          <span className="p-4 pr-0 text-slate-500">
+            <Search size={20} />
+          </span>
+          <DebouncedInput
+            value={globalFilter ?? ""}
+            onChange={(value) => setGlobalFilter(String(value))}
+            className="px-4 py-2 focus:outline-none"
+            placeholder="Search all columns..."
+          />
+          <button className="bg-slate-300 text-slate-500 px-4 py-2 m-2 rounded-lg font-medium text-sm">
+            Global Search
+          </button>
+        </div>
+      </div>
+
       <DndContext
         collisionDetection={closestCenter}
         modifiers={[restrictToHorizontalAxis]}
@@ -558,10 +741,12 @@ export default function ProductTable() {
               isSplit={isSplit}
               isPinBtnVisible={isPinBtnVisible}
               isOrderBtnVisible={isOrderBtnVisible}
+              isFilterInputVisible={isFilterInputVisible}
               tableType={"left"}
               columnSizeVars={columnSizeVars}
               totalTableWidth={table.getTotalSize()}
               enableMemo={enableMemo}
+              columnResizeMode={columnResizeMode}
             />
           )}
           <CustomTable
@@ -570,10 +755,12 @@ export default function ProductTable() {
             isSplit={isSplit}
             isPinBtnVisible={isPinBtnVisible}
             isOrderBtnVisible={isOrderBtnVisible}
+            isFilterInputVisible={isFilterInputVisible}
             tableType={"center"}
             columnSizeVars={columnSizeVars}
             totalTableWidth={table.getTotalSize()}
             enableMemo={enableMemo}
+            columnResizeMode={columnResizeMode}
           />
           {isSplit && (
             <CustomTable
@@ -582,10 +769,12 @@ export default function ProductTable() {
               isSplit={isSplit}
               isPinBtnVisible={isPinBtnVisible}
               isOrderBtnVisible={isOrderBtnVisible}
+              isFilterInputVisible={isFilterInputVisible}
               tableType={"right"}
               columnSizeVars={columnSizeVars}
               totalTableWidth={table.getTotalSize()}
               enableMemo={enableMemo}
+              columnResizeMode={columnResizeMode}
             />
           )}
         </div>

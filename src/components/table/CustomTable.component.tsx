@@ -11,8 +11,9 @@ import {
 } from "@dnd-kit/sortable";
 import DraggableHeader from "./DraggableHeader.component";
 import DragAlongCell from "./DragAlongCell.component";
-import type { TableType } from "../../model/table.model";
+import type { ResizeMode, TableType } from "../../model/table.model";
 import { memo } from "react";
+import TablePagination from "./TablePagination.component";
 
 interface TableProps {
   table: Table<IProduct>;
@@ -20,10 +21,12 @@ interface TableProps {
   isSplit: boolean;
   isPinBtnVisible: boolean;
   isOrderBtnVisible: boolean;
+  isFilterInputVisible: boolean;
   tableType: TableType;
   columnSizeVars: { [key: string]: number };
   totalTableWidth: number;
   enableMemo?: boolean;
+  columnResizeMode: ResizeMode;
 }
 
 function getTailwindClassForHeader(
@@ -159,6 +162,8 @@ function TanStackTable({
   isOrderBtnVisible,
   tableType = "center",
   columnSizeVars,
+  columnResizeMode,
+  isFilterInputVisible,
 }: TableProps) {
   return (
     <div className="bg-white w-full shadow-md rounded-lg overflow-hidden">
@@ -189,6 +194,9 @@ function TanStackTable({
                         header.depth,
                         index
                       )}
+                      table={table}
+                      columnResizeMode={columnResizeMode}
+                      isFilterInputVisible={isFilterInputVisible}
                     />
                   ))}
                 </SortableContext>
@@ -212,7 +220,7 @@ function TanStackTable({
                     key={footer.id}
                     colSpan={footer.colSpan}
                     className={
-                      "py-2 px-4 capitalize rounded bg-gray-200 text-slate-500 border-2 border-white " +
+                      "py-2 px-4 capitalize select-none rounded bg-gray-200 text-slate-500 border-2 border-white " +
                       getTailwindClassForHeader(
                         footerGroup.headers.length,
                         footer.depth,
@@ -236,6 +244,7 @@ function TanStackTable({
           </tfoot>
         </table>
       </div>
+      <TablePagination table={table} />
     </div>
   );
 }
@@ -250,6 +259,8 @@ export default function CustomTable({
   columnSizeVars,
   totalTableWidth,
   enableMemo,
+  columnResizeMode,
+  isFilterInputVisible,
 }: TableProps) {
   return (
     <>
@@ -264,6 +275,8 @@ export default function CustomTable({
             tableType={tableType}
             columnSizeVars={columnSizeVars}
             totalTableWidth={totalTableWidth}
+            columnResizeMode={columnResizeMode}
+            isFilterInputVisible={isFilterInputVisible}
           />
         ) : (
           <TanStackTable
@@ -275,6 +288,8 @@ export default function CustomTable({
             tableType={tableType}
             columnSizeVars={columnSizeVars}
             totalTableWidth={totalTableWidth}
+            columnResizeMode={columnResizeMode}
+            isFilterInputVisible={isFilterInputVisible}
           />
         )
       ) : null}
