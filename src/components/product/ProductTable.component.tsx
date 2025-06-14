@@ -457,7 +457,7 @@ export default function ProductTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [isPinBtnVisible, setIsPinBtnVisible] = useState(false);
   const [isOrderBtnVisible, setIsOrderBtnVisible] = useState(false);
-  const [isFilterInputVisible, setIsFilterInputVisible] = useState(true);
+  const [isFilterInputVisible, setIsFilterInputVisible] = useState(false);
   const [columnPinning, setColumnPinning] = useState({});
   const [isSplit, setIsSplit] = useState(false);
   const [enableMemo, setEnableMemo] = useState(false);

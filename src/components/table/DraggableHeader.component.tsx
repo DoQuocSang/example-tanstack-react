@@ -63,32 +63,40 @@ export default function DraggableHeader({
       <div className="flex items-center justify-center">
         <div className="flex flex-col justify-center items-center gap-2">
           <div className="flex flex-col items-center gap-1">
-            <div
-              className={
-                "flex items-center gap-1 " +
-                (header.column.getCanSort() ? "cursor-pointer" : "")
-              }
-              onClick={header.column.getToggleSortingHandler()}
-              title={
-                header.column.getCanSort()
-                  ? header.column.getNextSortingOrder() === "asc"
-                    ? "Sort ascending"
-                    : header.column.getNextSortingOrder() === "desc"
-                    ? "Sort descending"
-                    : "Clear sort"
-                  : undefined
-              }
-            >
-              {header.isPlaceholder
-                ? null
-                : flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-              {{
-                asc: <ArrowUpNarrowWide size={20} />,
-                desc: <ArrowDownWideNarrow size={20} />,
-              }[header.column.getIsSorted() as string] ?? null}
+            <div className="flex items-center gap-1">
+              <div
+                className={
+                  "flex items-center gap-1 " +
+                  (header.column.getCanSort() ? "cursor-pointer" : "")
+                }
+                onClick={header.column.getToggleSortingHandler()}
+                title={
+                  header.column.getCanSort()
+                    ? header.column.getNextSortingOrder() === "asc"
+                      ? "Sort ascending"
+                      : header.column.getNextSortingOrder() === "desc"
+                      ? "Sort descending"
+                      : "Clear sort"
+                    : undefined
+                }
+              >
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                {{
+                  asc: <ArrowUpNarrowWide size={20} />,
+                  desc: <ArrowDownWideNarrow size={20} />,
+                }[header.column.getIsSorted() as string] ?? null}
+              </div>
+
+              {isOrderBtnVisible && (
+                <div className="cursor-grab" {...attributes} {...listeners}>
+                  <GripVertical size={20} className="text-teal-500" />
+                </div>
+              )}
             </div>
 
             {header.column.getCanFilter() && isFilterInputVisible ? (
@@ -96,12 +104,6 @@ export default function DraggableHeader({
                 <Filter column={header.column} />
               </div>
             ) : null}
-
-            {isOrderBtnVisible && (
-              <div className="cursor-grab" {...attributes} {...listeners}>
-                <GripVertical size={20} className="text-teal-500" />
-              </div>
-            )}
           </div>
           <div
             {...{
