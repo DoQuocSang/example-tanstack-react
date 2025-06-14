@@ -6,11 +6,6 @@ import type { Status } from "../../model/status.model";
 import { useEffect, useState } from "react";
 import useCustomQuery from "../../hooks/useCustomQuery.hook";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export default function TodoList() {
   const [showCancel, setShowCancel] = useState(false);
 

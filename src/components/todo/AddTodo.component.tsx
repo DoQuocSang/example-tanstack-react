@@ -46,7 +46,7 @@ export default function AddTodo() {
 
       return { previousTodosResponse };
     },
-    onError: (err, newTodo, context) => {
+    onError: (_err, _newTodo, context) => {
       queryClient.setQueryData<ITodosResponse>(
         ["todos"],
         context?.previousTodosResponse
